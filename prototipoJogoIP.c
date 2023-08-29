@@ -1,3 +1,18 @@
+/*
+J = jogador
+S = Saída
+K = Chave (Key)
+P = Pilha
+E = Inmigo(Enemy)
+
+A movimentacao do jogo é baseada na leitura
+de caracteres pelo scanf, em que w vai pra cima,
+a vai pra esquerda, s vai pra baixo e d vai pra direita
+
+o objetivo é pegar a chave (K) e abrir a abrir a porta da saída (S)
+Se enconstar no inimigo (E) você perde.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
