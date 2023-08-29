@@ -303,7 +303,7 @@ void moverPersonagem(Fase *fase, char direcao) {
             }
             break;
         case 's':
-            if (cord.x < (*fase).comprimento) {
+            if (cord.y < (*fase).comprimento) {
                 (*fase).matriz[cord.x][cord.y].simbolo = '*';
                 (*fase).matriz[cord.x+1][cord.y].simbolo = 'J';
             }
