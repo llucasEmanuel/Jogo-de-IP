@@ -86,6 +86,7 @@ int main() {
         ClearBackground(WHITE);
        
         //PRECISA CONVERTER ESSES VALORES EM INT PRA PODER ATUALIZAR
+        //GUARDAR CADA STRING EM UMA VARIAVEL DIFERENTE E SÓ SOMAR 1 NO CHAR DO DIGITO
         DrawText("SCORE : 0", 30, 30, 40, BLACK);
         DrawText("CHAVES : 0", 30, 80, 40, BLACK);
         DrawText("BATERIAS : 0", 30, 130, 40, BLACK);
