@@ -4,21 +4,21 @@
 #include <math.h>
 #include <time.h>
 #include <raylib.h>
-
+//CRIAR BIBLIOTECAS ESPECIFICAS PARA PLAYER, INIMIGOS, COLETAVEIS, ...
 typedef struct {
     Texture textura;
-    Vector2 coordenadas;// {x, y}
+    Vector2 coordenadas;
     Rectangle hitbox;
-    int temChave;//flag
-    int qtdBaterias;
-} Player;//relacionar tudo oq foi criado com o player
+    int temChave;//flag que indica se tem (1) ou nao (0) a chave
+    int qtdBaterias;//qtd de baterias coletadas pelo jogador na fase
+} Player;
 
 typedef struct {
     Texture textura;
     Vector2 coordenadas;
     Rectangle hitbox;
-    int colisao;
-} Collectable;//Pilhas, chave, ...
+    int colisao;//flag que indica se houve (1) ou nao (0) colisao com aquele coletavel
+} Collectable;//baterias, chave, ...
 
 typedef struct {
     Texture textura;
@@ -27,10 +27,12 @@ typedef struct {
 } Enemy;
 
 void moverJogador(Player *jogador);
-//fazer um que detecta colisao entre jogador e inimigo
+//Criar funcoes de inicializar jogador, baterias e chave e colocar na de inicializar fase
+//Depois criar a funcao de inicializar fase, que add inimigos e reseta os objetos e o jogador
 int main() {
     
     srand(time(NULL));
+    
     InitWindow(1280, 720, "Jogo de IP");
     InitAudioDevice();
     //if (!IsWindowFullscreen()) ToggleFullscreen();
@@ -41,12 +43,12 @@ int main() {
     Player jogador;
     jogador.qtdBaterias = 0;
     jogador.temChave = 0;
-    jogador.textura = LoadTexture("sprite1.png");
+    jogador.textura = LoadTexture("Sprites e Texturas/sprite1.png");
     jogador.coordenadas = (Vector2){width/2, height/2};
-    //
+    
     //INICIALIZACAO DAS BATERIAS
     Collectable *baterias;
-    int qtdBaterias = (rand() % 3) + 1;//qtd de baterias que vao spawnar no mapa
+    int qtdBaterias = (rand() % 5) + 1;//qtd de baterias que vao aparecer no mapa
     Collectable *ptrAux = (Collectable *) malloc(qtdBaterias * sizeof(Collectable));
     if (ptrAux == NULL) {//checa se a alocacao ocorreu
         UnloadTexture(jogador.textura);
@@ -60,94 +62,118 @@ int main() {
         exit(1);
     }
     baterias = ptrAux;
+    char bateriasStr[] = "BATERIAS : 0";//11 == ind do char do digito
+    char chavesStr[] = "CHAVES : 0";//9 == ind do char do digito
     for (int i = 0; i < qtdBaterias; i++) {
-        baterias[i].textura = LoadTexture("sprite2.png");
-        baterias[i].coordenadas = (Vector2){(float) (rand() % width), (float) (rand() % height)};
+        baterias[i].textura = LoadTexture("Sprites e Texturas/spriteBateria.png");
+        //as coordenadas de cada bateria vao ser aleatorias mas dentro do limite da tela, posteriormente, do mapa
+        baterias[i].coordenadas = (Vector2){(float) (rand() % (width - 45)), (float) (rand() % (height - 60))};
         baterias[i].hitbox = (Rectangle) {
             baterias[i].coordenadas.x,
             baterias[i].coordenadas.y,
-            30, 75,
-            //baterias[i].textura.width,
-            //baterias[i].textura.height,
+            45,
+            60,
         };
         baterias[i].colisao = 0;//nao sofreu colisao
     }
-    //
+    
+    //INICIALIZACAO DA CHAVE
+    Collectable chave;
+    chave.textura = LoadTexture("Sprites e Texturas/spriteChave2.png");
+    chave.coordenadas = (Vector2) {(float) (rand() % (width - 90)), (float) (rand() % (height- 36))};
+    chave.hitbox = (Rectangle) {
+        chave.coordenadas.x,
+        chave.coordenadas.y,
+        90,
+        36,
+    };
+    chave.colisao = 0;
+    
     //INICIALIZACAO DOS SONS
     Sound musica = LoadSound("Sons e Musica/Spooked - Mini Vandals.mp3");
     PlaySound(musica);
-    //
+    
     SetTargetFPS(60);
 
+    //INICIO DO LOOP EM QUE RODA O JOGO
     while(!WindowShouldClose()) {
   
         BeginDrawing();
         
         ClearBackground(WHITE);
-       
-        //PRECISA CONVERTER ESSES VALORES EM INT PRA PODER ATUALIZAR
-        //GUARDAR CADA STRING EM UMA VARIAVEL DIFERENTE E SÓ SOMAR 1 NO CHAR DO DIGITO
-        DrawText("SCORE : 0", 30, 30, 40, BLACK);
-        DrawText("CHAVES : 0", 30, 80, 40, BLACK);
-        DrawText("BATERIAS : 0", 30, 130, 40, BLACK);
-        for (int i = 0; i < qtdBaterias && baterias[i].colisao == 0; i++) {
-            DrawTextureEx(baterias[i].textura, baterias[i].coordenadas, 0, 0.1f, WHITE);
+ 
+        DrawText("FASE 1", width / 2 - MeasureText("FASE 1", 40) / 2, height / 2 - 40, 40, BLACK);
+        
+        //DESENHA A TEXTURA DAS BATERIAS
+        
+        for (int i = 0; i < qtdBaterias; i++) {
+            if (baterias[i].colisao == 0) {
+                DrawTextureEx(baterias[i].textura, (Vector2) {baterias[i].coordenadas.x, baterias[i].coordenadas.y}, 0, 3, WHITE);
+                DrawRectangle(baterias[i].hitbox.x, baterias[i].hitbox.y, baterias[i].hitbox.width, baterias[i].hitbox.height, GREEN);
+            }
         }
         
-        DrawText("JOGO DE IP", width / 2 - MeasureText("JOGO DE IP", 40) / 2, height / 2 - 40, 40, BLACK);
-        DrawTextureEx(jogador.textura, jogador.coordenadas, 0, 0.33f, WHITE);
-        //as texturas que sao desenhadas depois ficam por cima das de antes
+        //DESENHA A TEXTURA DA CHAVE
+        DrawTextureEx(chave.textura, (Vector2) {chave.coordenadas.x, chave.coordenadas.y}, 0, 2.5, WHITE);
+        DrawRectangle(chave.hitbox.x, chave.hitbox.y, chave.hitbox.width, chave.hitbox.height, BLUE);
         
-        //atualiza a hitbox do jogador a cada iteracao
-        jogador.hitbox = (Rectangle) {
-            jogador.coordenadas.x,
-            jogador.coordenadas.y,
-            //talvez seja preciso reduzir essas medidas de width e height na hitbox
-            80, 120,
-            //jogador.textura.width,
-            //jogador.textura.height,
+        jogador.hitbox = (Rectangle) {//hitbox dinamica que se move conforme o sprite do jogador
+            jogador.coordenadas.x + 18,
+            jogador.coordenadas.y + 40,
+            96,
+            90,
         };
-        //DrawRectangle(jogador.coordenadas.x, jogador.coordenadas.y, 120, 200, GREEN);
+        
+        //DESENHA A TEXTURA DO JOGADOR
+        DrawTextureEx(jogador.textura, jogador.coordenadas, 0, 0.33f, WHITE);
+        DrawRectangle(jogador.hitbox.x, jogador.hitbox.y, jogador.hitbox.width, jogador.hitbox.height, RED);
+
         moverJogador(&jogador);
         
-        //CHECA SE HOUVE COLISAO COM UMA DAS PILHAS
-        int ind = -1;
-        int achou = 0;
-        int i;
-        for (i = 0; i < qtdBaterias && achou == 0; i++) {
+        //CHECA SE HOUVE COLISAO COM A CHAVE
+        if (CheckCollisionRecs(jogador.hitbox, chave.hitbox)) {
+            chave.colisao = 1;
+            printf("Colisao CHAVE\n");
+            UnloadTexture(chave.textura);//apaga a textura
+            chave.hitbox = (Rectangle) {0, 0, 0, 0};//remove a hitbox
+            jogador.temChave = 1;//atualiza a flag do jogador
+            chavesStr[9]++;//atualiza a qtd chaves na tela
+        }
+        
+        //CHECA SE HOUVE COLISAO COM UMA DAS BATERIAS
+        int indColisoes[qtdBaterias];//armazena os indices das baterias colididas
+        int qtdColisoes = 0;//qtd de baterias obtidas
+        for (int i = 0; i < qtdBaterias; i++) {
             if (CheckCollisionRecs(jogador.hitbox, baterias[i].hitbox)) {
-                ind = i;
-                achou = 1;
-            }
-            
-            if (ind == i) {
-                baterias[ind].colisao = 1;
-                printf("Colisao\n");
-                UnloadTexture(baterias[ind].textura);
-                jogador.qtdBaterias++; 
-            }
-            else {
-                ind = -1;
-                achou = 0;
+                indColisoes[qtdColisoes] = i;//guarda os indices
+                qtdColisoes++;
+                bateriasStr[11]++;//atualiza a qtd baterias na tela
             }
         }
         
-        
-        // for (int i = 0; i < qtdBaterias && CheckCollisionRecs(jogador.hitbox, baterias[i].hitbox); i++) {
-            // //DrawRectangle(baterias[i].coordenadas.x, baterias[i].coordenadas.y, 50, 100, BLUE);
-                // //DrawRectangle(baterias[i].coordenadas.x, baterias[i].coordenadas.y, 50, 100, WHITE);
-            // if (baterias[i].colisao == 1) {
-                // UnloadTexture(baterias[i].textura);
-                // jogador.qtdBaterias++; 
-            // }
-            
-        // }
-        //DrawRectangle(jogador.coordenadas.x, jogador.coordenadas.y, 120, 200, GREEN);
-        EndDrawing();
-       // DrawRectangle(jogador.coordenadas.x, jogador.coordenadas.y, 120, 200, GREEN);
-            
+        //REMOVER BATERIAS
+        for (int i = 0 ; i < qtdColisoes; i++) { 
+            int ind = indColisoes[i];
+            //checa a flag da bateria daquele indice, se o indice estiver dentro da lista e flag for 0,
+            //entao tem que apagar a bateria
+            if (baterias[ind].colisao == 0) {
+                baterias[ind].colisao = 1;
+                printf("Colisao BATERIA\n");
+                UnloadTexture(baterias[ind].textura);
+                baterias[ind].hitbox = (Rectangle){0, 0, 0, 0};
+                jogador.qtdBaterias++; 
+            }
+        }
+
+        //GUARDAR CADA STRING EM UMA VARIAVEL DIFERENTE E SÓ SOMAR 1 NO CHAR DO DIGITO
+        DrawText("SCORE : 0", 30, 30, 40, BLACK);
+        DrawText(chavesStr, 30, 80, 40, BLACK);
+        DrawText(bateriasStr, 30, 130, 40, BLACK);
+
+        EndDrawing();        
     }
-    
+
+    //DESALOCA OS PONTEIROS, APAGA AS TEXTURAS E DESATIVA AS FUNCOES DE AUDIO
     UnloadTexture(jogador.textura);
     for (int i = 0; i < qtdBaterias; i++) {
        UnloadTexture(baterias[i].textura); 
@@ -159,8 +185,6 @@ int main() {
 }
 
 void moverJogador(Player *jogador) {
-    //Movimentacao do personagem
-    //Velocidade diagonal equilibrada
     if (IsKeyDown(KEY_W)) {
         if (IsKeyDown(KEY_D)) {
             (*jogador).coordenadas.y -= GetFrameTime() * (125.f * sqrt(2.f));
@@ -214,4 +238,3 @@ void moverJogador(Player *jogador) {
         } 
     }
 }
-
