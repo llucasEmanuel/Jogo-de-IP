@@ -11,6 +11,7 @@ typedef struct {
     Rectangle hitbox;
     int temChave;//flag que indica se tem (1) ou nao (0) a chave
     int qtdBaterias;//qtd de baterias coletadas pelo jogador na fase
+    int score;
 } Player;
 
 typedef struct {
@@ -45,6 +46,7 @@ int main() {
     jogador.temChave = 0;
     jogador.textura = LoadTexture("Sprites e Texturas/sprite1.png");
     jogador.coordenadas = (Vector2){width/2, height/2};
+    jogador.score = 0;
     
     //INICIALIZACAO DAS BATERIAS
     Collectable *baterias;
@@ -109,13 +111,13 @@ int main() {
         for (int i = 0; i < qtdBaterias; i++) {
             if (baterias[i].colisao == 0) {
                 DrawTextureEx(baterias[i].textura, (Vector2) {baterias[i].coordenadas.x, baterias[i].coordenadas.y}, 0, 3, WHITE);
-                DrawRectangle(baterias[i].hitbox.x, baterias[i].hitbox.y, baterias[i].hitbox.width, baterias[i].hitbox.height, GREEN);
+                DrawRectangle(baterias[i].hitbox.x, baterias[i].hitbox.y, baterias[i].hitbox.width, baterias[i].hitbox.height, BLANK);
             }
         }
         
         //DESENHA A TEXTURA DA CHAVE
         DrawTextureEx(chave.textura, (Vector2) {chave.coordenadas.x, chave.coordenadas.y}, 0, 2.5, WHITE);
-        DrawRectangle(chave.hitbox.x, chave.hitbox.y, chave.hitbox.width, chave.hitbox.height, BLUE);
+        DrawRectangle(chave.hitbox.x, chave.hitbox.y, chave.hitbox.width, chave.hitbox.height, BLANK);
         
         jogador.hitbox = (Rectangle) {//hitbox dinamica que se move conforme o sprite do jogador
             jogador.coordenadas.x + 18,
@@ -126,7 +128,7 @@ int main() {
         
         //DESENHA A TEXTURA DO JOGADOR
         DrawTextureEx(jogador.textura, jogador.coordenadas, 0, 0.33f, WHITE);
-        DrawRectangle(jogador.hitbox.x, jogador.hitbox.y, jogador.hitbox.width, jogador.hitbox.height, RED);
+        DrawRectangle(jogador.hitbox.x, jogador.hitbox.y, jogador.hitbox.width, jogador.hitbox.height, BLANK);
 
         moverJogador(&jogador);
         
@@ -138,6 +140,7 @@ int main() {
             chave.hitbox = (Rectangle) {0, 0, 0, 0};//remove a hitbox
             jogador.temChave = 1;//atualiza a flag do jogador
             chavesStr[9]++;//atualiza a qtd chaves na tela
+            jogador.score += 200;
         }
         
         //CHECA SE HOUVE COLISAO COM UMA DAS BATERIAS
@@ -162,11 +165,12 @@ int main() {
                 UnloadTexture(baterias[ind].textura);
                 baterias[ind].hitbox = (Rectangle){0, 0, 0, 0};
                 jogador.qtdBaterias++; 
+                jogador.score+= 50;
             }
         }
 
         //GUARDAR CADA STRING EM UMA VARIAVEL DIFERENTE E SÓ SOMAR 1 NO CHAR DO DIGITO
-        DrawText("SCORE : 0", 30, 30, 40, BLACK);
+        DrawText(TextFormat("SCORE : %d", jogador.score), 30, 30, 40, BLACK);
         DrawText(chavesStr, 30, 80, 40, BLACK);
         DrawText(bateriasStr, 30, 130, 40, BLACK);
 
