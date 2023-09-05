@@ -5,6 +5,7 @@
 
 
 Collectable *inicializarBaterias(int *qtdBaterias) {
+    
     int height = GetScreenHeight();
     int width = GetScreenWidth();
     Collectable *baterias = NULL;
@@ -37,6 +38,7 @@ Collectable *inicializarBaterias(int *qtdBaterias) {
 }
 
 Collectable inicializarChave() {
+    
     int height = GetScreenHeight();
     int width = GetScreenWidth();
     Collectable chave;
@@ -53,6 +55,7 @@ Collectable inicializarChave() {
 }
 
 Collectable inicializarPorta() {
+    
     int height = GetScreenHeight();
     int width = GetScreenWidth();
     Collectable porta;
