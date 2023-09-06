@@ -2,26 +2,43 @@
 #include <math.h>
 #include "player.h"
 
-void moverJogador(Player *jogador) {
-    if (IsKeyDown(KEY_W)) {
-        if (IsKeyDown(KEY_D)) {
+void moverJogador(Player *jogador) { //TUDO CONFIGURADO LEVANDO EM CONSIDERACAO A TELA CHEIA
+    int pode_w = 1, pode_s = 1, pode_d = 1, pode_a = 1;
+    int height = GetScreenHeight();
+    int width = GetScreenWidth();
+    
+    if(jogador->coordenadas.x <= -20){ //quando passa de um certo ponto, limita o movimento para esquerda
+        pode_a = 0;
+    }
+    if(jogador->coordenadas.x >= (width - 0.3*jogador->textura.width)){ // "" "" para direita
+        pode_d = 0;
+    }
+    if(jogador->coordenadas.y <= -22){ //"" "" para cima
+        pode_w = 0;
+    }
+    if(jogador->coordenadas.y >= (height - 0.3*jogador->textura.height)){ //"" "" para baixo
+        pode_s = 0;
+    }
+    
+    if (IsKeyDown(KEY_W) && pode_w == 1) {
+        if (IsKeyDown(KEY_D) && pode_d == 1) {
             jogador->coordenadas.y -= GetFrameTime() * (150 * sqrt(2));
             jogador->coordenadas.x += GetFrameTime() * (150 * sqrt(2));
         }
-        else if (IsKeyDown(KEY_A)) {
+        else if (IsKeyDown(KEY_A) && pode_a == 1) {
             jogador->coordenadas.y -= GetFrameTime() * (150 * sqrt(2));
             jogador->coordenadas.x -= GetFrameTime() * (150 * sqrt(2));
         }
-        else {
+        else{
             jogador->coordenadas.y -= GetFrameTime() * 300;
         }  
     }
-    else if (IsKeyDown(KEY_S)) {
-        if (IsKeyDown(KEY_D)) {
+    else if (IsKeyDown(KEY_S) && pode_s == 1) {
+        if (IsKeyDown(KEY_D) && pode_d == 1) {
             jogador->coordenadas.y += GetFrameTime() * (150 * sqrt(2));
             jogador->coordenadas.x += GetFrameTime() * (150 * sqrt(2));
         }
-        else if (IsKeyDown(KEY_A)) {
+        else if (IsKeyDown(KEY_A) && pode_a == 1) {
             jogador->coordenadas.y += GetFrameTime() * (150 * sqrt(2));
             jogador->coordenadas.x -= GetFrameTime() * (150 * sqrt(2));
         }
@@ -29,12 +46,12 @@ void moverJogador(Player *jogador) {
             jogador->coordenadas.y += GetFrameTime() * 300;
         }  
     }
-    else if (IsKeyDown(KEY_A)) {
-        if (IsKeyDown(KEY_W)) {
+    else if (IsKeyDown(KEY_A) && pode_a == 1) {
+        if (IsKeyDown(KEY_W) && pode_w == 1) {
             jogador->coordenadas.y -= GetFrameTime() * (150 * sqrt(2));
             jogador->coordenadas.x -= GetFrameTime() * (150 * sqrt(2));
         }
-        else if (IsKeyDown(KEY_S)) {
+        else if (IsKeyDown(KEY_S) && pode_s == 1) {
             jogador->coordenadas.y += GetFrameTime() * (150 * sqrt(2));
             jogador->coordenadas.x -= GetFrameTime() * (150 * sqrt(2));
         }
@@ -42,12 +59,12 @@ void moverJogador(Player *jogador) {
             jogador->coordenadas.x -= GetFrameTime() * 300;
         } 
     }
-    else if (IsKeyDown(KEY_D)) {
-        if (IsKeyDown(KEY_W)) {
+    else if (IsKeyDown(KEY_D) && pode_d == 1) {
+        if (IsKeyDown(KEY_W) && pode_w) {
             jogador->coordenadas.y -= GetFrameTime() * (150 * sqrt(2));
             jogador->coordenadas.x += GetFrameTime() * (150 * sqrt(2));
         }
-        else if (IsKeyDown(KEY_S)) {
+        else if (IsKeyDown(KEY_S) && pode_s == 1) {
             jogador->coordenadas.y += GetFrameTime() * (150 * sqrt(2));
             jogador->coordenadas.x += GetFrameTime() * (150 * sqrt(2));
         }
