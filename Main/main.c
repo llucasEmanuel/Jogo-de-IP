@@ -9,7 +9,18 @@
 #include "collectable.h"
 #include "enemy.h"
 
-void criarFase(Player *jogador);
+typedef struct {//Fazer a funcao criarFase() retornar a fase inicializada
+    //Player jogador;//Jogador vai ser independente da fase, talvez n precise disso
+    Enemy *inimigos;
+    Collectable chave;
+    Collectable porta;
+    Collectable *baterias;
+    int qtdBaterias;
+    int qtdInimigos;
+} Fase;
+
+Fase criarFase();
+void gameOver();
 
 int main() {
     
@@ -18,53 +29,43 @@ int main() {
     int height = GetScreenHeight();
     int width = GetScreenWidth();
     
-    Player jogador = inicializarJogador();
-    //Enemy *inimigos = NULL;
-    //int qtdInimigos = 0;
-    criarFase(&jogador);
-
-    return 0; 
-}
-
-void criarFase(Player *jogador) {
+    Player jogador = inicializarJogador();//inicializa jogador fora do criarFase para manter o score para as outras fases
+    Fase fase = criarFase();
+    fase.qtdInimigos = 1;
     
-    int height = GetScreenHeight();
-    int width = GetScreenWidth();
+    //INICIALIZACAO DOS SONS
+    InitAudioDevice();
+    Sound musica = LoadSound("Sons e Musica/Spooked - Mini Vandals.mp3");
+    PlaySound(musica);
+    //if (!IsWindowFullscreen()) ToggleFullscreen();
+    SetTargetFPS(60);
     
     //AUXILIAR MENU
     int continua = 0, continua1 = 0;
-    
-    InitAudioDevice();
-    //if (!IsWindowFullscreen()) ToggleFullscreen();
-    
-    //INICIALIZACAO DOS INIMIGOS
-    Enemy *inimigos = inicializarInimigos();
-    
-    //INICIALIZACAO DAS BATERIAS
-    int qtdBaterias = 0;//qtd baterias que irao aparecer na tela (a qtd eh aleatorio e definida na funcao)
-    Collectable *baterias = inicializarBaterias(&qtdBaterias);
-    
-    //INICIALIZACAO DA CHAVE
-    Collectable chave = inicializarChave();
-    
-    //INICIALIZACAO DA PORTA DE SAIDA
-    Collectable porta = inicializarPorta();
-    
-    //INICIALIZACAO DOS SONS
-    Sound musica = LoadSound("Sons e Musica/Spooked - Mini Vandals.mp3");
-    PlaySound(musica);
-    
-    SetTargetFPS(60);
     
     char bateriasStr[] = "BATERIAS : 0";//11 == ind do char do digito
     char chavesStr[] = "CHAVES : 0";//9 == ind do char do digito
     
     int entrouNaPorta = 0;
+    int perdeu = 0;
     
 
     //INICIO DO LOOP EM QUE RODA O JOGO
-    while(!WindowShouldClose()) {
-                
+    while(!WindowShouldClose()) {       
+
+        while (perdeu) {
+            
+            BeginDrawing();
+            ClearBackground(WHITE);
+
+            DrawText("PAULO SALGADO NÃO... NÃO IRA NOS SALVAR", width / 2 - MeasureText("PAULO SALGADO NÃO... NÃO IRA NOS SALVAR", 75) / 2, height / 2 - 75, 75, BLACK);
+
+            EndDrawing();
+            
+            if (IsKeyPressed(KEY_ESCAPE)) {//mudar a tecla para KEY_SPACE depois
+                perdeu = 0;
+            }
+        }
         
         if(continua == 0 && continua1 == 0){ //Chama a primeira parte do menu
            continua = geraMenu();
@@ -76,138 +77,214 @@ void criarFase(Player *jogador) {
        
         
         if(continua1 == 1 && continua == 1){ //Inicia Jogo
-                while (entrouNaPorta) {
-                    BeginDrawing();
-                    ClearBackground(WHITE);
+     
+            while (entrouNaPorta) {
+                BeginDrawing();
+                ClearBackground(WHITE);
 
-                    DrawText(TextFormat("HIGHSCORE : %d", jogador->score), width / 2 - MeasureText("HIGHSCORE : ", 75) / 2, height / 2 - 75, 75, BLACK);
+                DrawText(TextFormat("HIGHSCORE : %d", jogador.score), width / 2 - MeasureText("HIGHSCORE : ", 75) / 2, height / 2 - 75, 75, BLACK);
+   
 
-                    EndDrawing();
-                    
-                    if (IsKeyPressed(KEY_ESCAPE)) {//mudar a tecla para KEY_SPACE depois
-                        entrouNaPorta = 0;
+                EndDrawing();
+             
+                if (IsKeyPressed(KEY_ESCAPE)) {
+                    entrouNaPorta = 0;
+                }
+            }
+
+                BeginDrawing();
+                
+                jogador.campoVisao = 150 + (35 * jogador.qtdBaterias);//raio do campo de visao
+                DrawCircle(jogador.hitbox.x + 46, jogador.hitbox.y + 40, jogador.campoVisao, WHITE);//campo de visao
+                ClearBackground(BLACK);
+        
+                DrawText("FASE 1", width / 2 - MeasureText("FASE 1", 40) / 2, height / 2 - 40, 40, BLACK);
+          
+                //DESENHA INIMIGOS
+                if (!perdeu) {
+                    float distCampoVisaoinimigoC = sqrt(pow((2*jogador.coordenadas.x + 0.33*jogador.textura.width)/2 - (2*fase.inimigos[0].coordenadas.x + 8*fase.inimigos[0].textura.width)/2, 2)
+                    + pow((2*jogador.coordenadas.y + 0.33*jogador.textura.height)/2 - (2*fase.inimigos[0].coordenadas.y + 8*fase.inimigos[0].textura.height)/2, 2));
+                    if (distCampoVisaoinimigoC < jogador.campoVisao) {//se tiver fora do campo de visao fica preto
+                        DrawTextureEx(fase.inimigos[0].textura, fase.inimigos[0].coordenadas, 0, 8, WHITE);
+                    }
+                    else DrawTextureEx(fase.inimigos[0].textura, fase.inimigos[0].coordenadas, 0, 8, BLACK);
+                    DrawRectangle(fase.inimigos[0].hitbox.x, fase.inimigos[0].hitbox.y, fase.inimigos[0].hitbox.width, fase.inimigos[0].hitbox.height, BLANK);
+                }
+                
+                //DESENHA A TEXTURA DAS BATERIAS 
+                
+                for (int i = 0; i < fase.qtdBaterias; i++) {
+                    float distCampoVisaoBateriaC = sqrt(pow((2*jogador.coordenadas.x + 0.33*jogador.textura.width)/2 - (2*fase.baterias[i].coordenadas.x + 3*fase.baterias[i].textura.width)/2, 2)
+                    + pow((2*jogador.coordenadas.y + 0.33*jogador.textura.height)/2 - (2*fase.baterias[i].coordenadas.y + 3*fase.baterias[i].textura.height)/2, 2));
+                    if (fase.baterias[i].colisao == 0) {
+                        if (distCampoVisaoBateriaC < jogador.campoVisao) {
+                            DrawTextureEx(fase.baterias[i].textura, fase.baterias[i].coordenadas, 0, 3, WHITE);
+                        }
+                        else DrawTextureEx(fase.baterias[i].textura, fase.baterias[i].coordenadas, 0, 3, BLACK);
+                        DrawRectangle(fase.baterias[i].hitbox.x, fase.baterias[i].hitbox.y, fase.baterias[i].hitbox.width, fase.baterias[i].hitbox.height, BLANK);
                     }
                 }
-            
-            
-            BeginDrawing();
-            
-            // jogador->campoVisao = 150 + (25 * jogador->qtdBaterias);
-            // DrawCircle(jogador->hitbox.x + 46, jogador->hitbox.y + 40, jogador->campoVisao, WHITE);//campo de visao
-            ClearBackground(WHITE);
-     
-            DrawText("FASE 1", width / 2 - MeasureText("FASE 1", 40) / 2, height / 2 - 40, 40, BLACK);
-            
-            //DESENHA INIMIGOS
-            DrawTextureEx(inimigos[0].textura, inimigos[0].coordenadas, 0, 8, WHITE);
-            DrawRectangle(inimigos[0].hitbox.x, inimigos[0].hitbox.y, inimigos[0].hitbox.width, inimigos[0].hitbox.height, BLANK);
-            
-            //DESENHA A TEXTURA DAS BATERIAS 
-            for (int i = 0; i < qtdBaterias; i++) {
-                if (baterias[i].colisao == 0) {
-                    DrawTextureEx(baterias[i].textura, (Vector2) {baterias[i].coordenadas.x, baterias[i].coordenadas.y}, 0, 3, WHITE);
-                    DrawRectangle(baterias[i].hitbox.x, baterias[i].hitbox.y, baterias[i].hitbox.width, baterias[i].hitbox.height, BLANK);
+                
+                //DESENHA A TEXTURA DA CHAVE
+                float distCampoVisaoChaveC = sqrt(pow((2*jogador.coordenadas.x + 0.33*jogador.textura.width)/2 - (2*fase.chave.coordenadas.x + 2.5*fase.chave.textura.width)/2, 2)
+                + pow((2*jogador.coordenadas.y + 0.33*jogador.textura.height)/2 - (2*fase.chave.coordenadas.y + 2.5*fase.chave.textura.height)/2, 2));//dist em relacao ao centro
+                //fazer o mapeamento de cada objeto em 4 pontos (E, D, C, B) //esquerda diretia cima baixo e so fazer o objeto aparecer quando a distancia dos 4 pontos estiverem dentro do criculo
+                // float distCampoVisaoBateria1 = sqrt(pow((2*jogador.coordenadas.x + 0.3*jogador.textura.width)/2 - fase.chave.coordenadas.x, 2) +
+                // pow(((2*jogador.coordenadas.y + 0.3*jogador.textura.height)/2 - fase.chave.coordenadas.y), 2));
+                // float distCampoVisaoBateria2 = sqrt(pow((2*jogador.coordenadas.x + 0.3*jogador.textura.width)/2 - fase.chave.coordenadas.x + 2.5*fase.chave.textura.width, 2) +
+                // pow(((2*jogador.coordenadas.y + 0.3*jogador.textura.height)/2 - fase.chave.coordenadas.y + 2.5*fase.chave.textura.height), 2));
+                
+                if (!jogador.temChave) {
+                    if (distCampoVisaoChaveC < jogador.campoVisao) {
+                        DrawTextureEx(fase.chave.textura, fase.chave.coordenadas, 0, 2.5, WHITE);
+                    }
+                    else DrawTextureEx(fase.chave.textura, fase.chave.coordenadas, 0, 2.5, BLACK);
+                    DrawRectangle(fase.chave.hitbox.x, fase.chave.hitbox.y, fase.chave.hitbox.width, fase.chave.hitbox.height, BLANK);
                 }
-            }
-            
-            //DESENHA A TEXTURA DA CHAVE
-            DrawTextureEx(chave.textura, (Vector2) {chave.coordenadas.x, chave.coordenadas.y}, 0, 2.5, WHITE);
-            DrawRectangle(chave.hitbox.x, chave.hitbox.y, chave.hitbox.width, chave.hitbox.height, BLANK);
-            
-            //hitbox dinamica que se move conforme o sprite do jogador
-            jogador->hitbox = (Rectangle) {
-                jogador->coordenadas.x + 18,
-                jogador->coordenadas.y + 40,
-                96,
-                90,
-            };
-            
-            if (!jogador->temChave) {//desenha antes se o jogador nao tiver a chave
-                DrawTextureEx(porta.textura, porta.coordenadas, 0, 2.2, WHITE);
-                DrawRectangle(porta.hitbox.x, porta.hitbox.y, porta.hitbox.width, porta.hitbox.height, BLANK);
-            }
-            
-            //DESENHA A TEXTURA DO JOGADOR
-            DrawTextureEx(jogador->textura, jogador->coordenadas, 0, 0.33, WHITE);
-            DrawRectangle(jogador->hitbox.x, jogador->hitbox.y, jogador->hitbox.width, jogador->hitbox.height, BLANK);
-            
-            if (jogador->temChave) {//desenha depois se tiver a chave
-                DrawTextureEx(porta.textura, porta.coordenadas, 0, 2.2, WHITE);
-                DrawRectangle(porta.hitbox.x, porta.hitbox.y, porta.hitbox.width, porta.hitbox.height, BLANK);
-            }
+                
+                //hitbox dinamica que se move conforme o sprite do jogador
+                jogador.hitbox = (Rectangle) {
+                    jogador.coordenadas.x + 18,
+                    jogador.coordenadas.y + 40,
+                    96,
+                    90,
+                };
+                //centro da hitbox do jogador
+                //(2*jogador.hitbox.x + jogador.hitbox.width)/2 
+                //(2*jogador.hitbox.y + jogador.hitbox.height)/2
+                
+                //centro da hitbox da chave
+                //(2*chave.hitbox.x + chave.hitbox.width)/2 
+                //(2*chave.hitbox.y + chave.hitbox.height)/2
+                
+                float distCampoVisaoPortaC = sqrt(pow((2*jogador.coordenadas.x + 0.33*jogador.textura.width)/2 - (2*fase.porta.coordenadas.x + 2.2*fase.porta.textura.width)/2, 2)
+                + pow((2*jogador.coordenadas.y + 0.33*jogador.textura.height)/2 - (2*fase.porta.coordenadas.y + 2.2*fase.porta.textura.height)/2, 2));
+                if (!jogador.temChave) {//desenha antes se o jogador nao tiver a chave
+                    if (distCampoVisaoPortaC < jogador.campoVisao) {
+                        DrawTextureEx(fase.porta.textura, fase.porta.coordenadas, 0, 2.2, WHITE);
+                    }
+                    else DrawTextureEx(fase.porta.textura, fase.porta.coordenadas, 0, 2.2, BLACK);
+                    DrawRectangle(fase.porta.hitbox.x, fase.porta.hitbox.y, fase.porta.hitbox.width, fase.porta.hitbox.height, BLANK);
+                }
+                
+                //DESENHA A TEXTURA DO JOGADOR
+                if (!perdeu) {
+                    DrawTextureEx(jogador.textura, jogador.coordenadas, 0, 0.33, WHITE);
+                    DrawRectangle(jogador.hitbox.x, jogador.hitbox.y, jogador.hitbox.width, jogador.hitbox.height, BLANK);
+                }
+                
+                if (jogador.temChave) {//desenha depois se tiver a chave
+                    if (distCampoVisaoPortaC < jogador.campoVisao) {
+                        DrawTextureEx(fase.porta.textura, fase.porta.coordenadas, 0, 2.2, WHITE);
+                    }
+                    else DrawTextureEx(fase.porta.textura, fase.porta.coordenadas, 0, 2.2, BLACK);
+                    DrawRectangle(fase.porta.hitbox.x, fase.porta.hitbox.y, fase.porta.hitbox.width, fase.porta.hitbox.height, BLANK);
+                }
 
-            moverJogador(jogador);
-            
-            //CHECA SE HOUVE COLISAO COM A CHAVE
-            if (CheckCollisionRecs(jogador->hitbox, chave.hitbox)) {
-                chave.colisao = 1;
-                printf("Colisao CHAVE\n");
-                UnloadTexture(chave.textura);//apaga a textura
-                chave.hitbox = (Rectangle) {0, 0, 0, 0};//remove a hitbox
-                jogador->temChave = 1;//atualiza a flag do jogador
-                chavesStr[9]++;//atualiza a qtd chaves na tela
-                jogador->score += 200;
-            }
-            
-            //CHECA SE HOUVE COLISAO COM A PORTA
-            if (CheckCollisionRecs(jogador->hitbox, porta.hitbox)) {
-                if (jogador->temChave) {
-                    porta.colisao = 1;
-                    printf("Colisao PORTA\n");
-                    UnloadTexture(porta.textura);
-                    porta.hitbox = (Rectangle) {0, 0 , 0 , 0};
-                    jogador->score += 500;
-                    entrouNaPorta = 1;
-                    //return;//Sai da funcao
+                moverJogador(&jogador);
+                
+                if (CheckCollisionRecs(jogador.hitbox, fase.inimigos[0].hitbox)) {
+                    printf("Colisao INIMIGO");
+                    UnloadTexture(jogador.textura);
+                    jogador.hitbox = (Rectangle) {0, 0, 0, 0};
+                    perdeu = 1;
                 }
-                else {
-                    DrawText("PORTA TRANCADA", width/2 - MeasureText("PORTA TRANCADA", 30), 30, 40, RED);
+                
+                //CHECA SE HOUVE COLISAO COM A CHAVE
+                if (CheckCollisionRecs(jogador.hitbox, fase.chave.hitbox)) {
+                    fase.chave.colisao = 1;
+                    printf("Colisao CHAVE\n");
+                    UnloadTexture(fase.chave.textura);//apaga a textura
+                    fase.chave.hitbox = (Rectangle) {0, 0, 0, 0};//remove a hitbox
+                    jogador.temChave = 1;//atualiza a flag do jogador
+                    chavesStr[9]++;//atualiza a qtd chaves na tela
+                    jogador.score += 200;
                 }
-            }
-            
-            //CHECA SE HOUVE COLISAO COM UMA DAS BATERIAS
-            int indColisoes[qtdBaterias];//armazena os indices das baterias colididas
-            int qtdColisoes = 0;//qtd de baterias obtidas
-            for (int i = 0; i < qtdBaterias; i++) {
-                if (CheckCollisionRecs(jogador->hitbox, baterias[i].hitbox)) {
-                    indColisoes[qtdColisoes] = i;//guarda os indices
-                    qtdColisoes++;
-                    bateriasStr[11]++;//atualiza a qtd baterias na tela
+                
+                //CHECA SE HOUVE COLISAO COM A PORTA
+                if (CheckCollisionRecs(jogador.hitbox, fase.porta.hitbox)) {
+                    if (jogador.temChave) {
+                        fase.porta.colisao = 1;
+                        printf("Colisao PORTA\n");
+                        UnloadTexture(fase.porta.textura);
+                        fase.porta.hitbox = (Rectangle) {0, 0, 0, 0};
+                        jogador.score += 500;
+                        entrouNaPorta = 1;
+                    }
+                    else {
+                        DrawText("PORTA TRANCADA", width/2 - MeasureText("PORTA TRANCADA", 30), 50, 40, RED);
+                    }
                 }
-            }
-            
-            //REMOVER BATERIAS
-            for (int i = 0 ; i < qtdColisoes; i++) { 
-                int ind = indColisoes[i];
-                //checa a flag da bateria daquele indice, se o indice estiver dentro da lista e flag for 0,
-                //entao tem que apagar a bateria
-                if (baterias[ind].colisao == 0) {
-                    baterias[ind].colisao = 1;
-                    printf("Colisao BATERIA\n");
-                    UnloadTexture(baterias[ind].textura);
-                    baterias[ind].hitbox = (Rectangle){0, 0, 0, 0};
-                    jogador->qtdBaterias++; 
-                    jogador->score += 50;
+                
+                //CHECA SE HOUVE COLISAO COM UMA DAS BATERIAS
+                int indColisoes[fase.qtdBaterias];//armazena os indices das baterias colididas
+                int qtdColisoes = 0;//qtd de baterias obtidas
+                for (int i = 0; i < fase.qtdBaterias; i++) {
+                    if (CheckCollisionRecs(jogador.hitbox, fase.baterias[i].hitbox)) {
+                        indColisoes[qtdColisoes] = i;//guarda os indices
+                        qtdColisoes++;
+                        bateriasStr[11]++;//atualiza a qtd baterias na tela
+                    }
                 }
-            }
+                
+                //REMOVER BATERIAS
+                for (int i = 0 ; i < qtdColisoes; i++) { 
+                    int ind = indColisoes[i];
+                    //checa a flag da bateria daquele indice, se o indice estiver dentro da lista e flag for 0,
+                    //entao tem que apagar a bateria
+                    if (fase.baterias[ind].colisao == 0) {
+                        fase.baterias[ind].colisao = 1;
+                        printf("Colisao BATERIA\n");
+                        UnloadTexture(fase.baterias[ind].textura);
+                        fase.baterias[ind].hitbox = (Rectangle){0, 0, 0, 0};
+                        jogador.qtdBaterias++; 
+                        jogador.score += 50;
+                    }
+                }
 
-            //GUARDAR CADA STRING EM UMA VARIAVEL DIFERENTE E SÓ SOMAR 1 NO CHAR DO DIGITO
-            DrawText(TextFormat("SCORE : %d", jogador->score), 30, 30, 40, GRAY);
-            DrawText(chavesStr, 30, 80, 40, GRAY);
-            DrawText(bateriasStr, 30, 130, 40, GRAY);
+                //GUARDAR CADA STRING EM UMA VARIAVEL DIFERENTE E SÓ SOMAR 1 NO CHAR DO DIGITO
+                DrawText(TextFormat("SCORE : %d", jogador.score), 30, 30, 40, GRAY);
+                DrawText(chavesStr, 30, 80, 40, GRAY);
+                DrawText(bateriasStr, 30, 130, 40, GRAY);
 
-            EndDrawing();  
+                EndDrawing();  
+            
         }
     }
 
     //DESALOCA OS PONTEIROS, APAGA AS TEXTURAS E DESATIVA AS FUNCOES DE AUDIO
-    UnloadTexture(jogador->textura);
-    UnloadTexture(chave.textura);
-    UnloadTexture(porta.textura);
-    for (int i = 0; i < qtdBaterias; i++) {
-       UnloadTexture(baterias[i].textura); 
+    UnloadTexture(jogador.textura);
+    UnloadTexture(fase.chave.textura);
+    UnloadTexture(fase.porta.textura);
+    for (int i = 0; i < fase.qtdBaterias; i++) {
+       UnloadTexture(fase.baterias[i].textura); 
     }
-    free(baterias);
+    free(fase.baterias);
     CloseAudioDevice();
     CloseWindow();
+
+
+    return 0; 
+}
+
+Fase criarFase() {//usa o endereco do jogador para poder alterar a posicao e outros fatores
+    
+    int height = GetScreenHeight();
+    int width = GetScreenWidth();
+
+    Fase fase;
+    //INICIALIZACAO DOS INIMIGOS
+    fase.inimigos = inicializarInimigos();
+ 
+    //INICIALIZACAO DAS BATERIAS
+    fase.qtdBaterias = 0;
+    fase.baterias = inicializarBaterias(&fase.qtdBaterias);
+    
+    //INICIALIZACAO DA CHAVE
+    fase.chave = inicializarChave();
+    
+    //INICIALIZACAO DA PORTA DE SAIDA
+    fase.porta = inicializarPorta();
+    
+    return fase;
 }
