@@ -4,6 +4,7 @@ typedef struct {
     Texture textura;
     Vector2 coordenadas;
     Rectangle hitbox;
+    Vector2 centro;
     int temChave;//flag que indica se tem (1) ou nao (0) a chave
     int qtdBaterias;//qtd de baterias coletadas pelo jogador na fase
     int score;
