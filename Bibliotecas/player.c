@@ -16,7 +16,7 @@ void moverJogador(Player *jogador) { //TUDO CONFIGURADO LEVANDO EM CONSIDERACAO 
     if(jogador->coordenadas.y <= -22){ //"" "" para cima
         pode_w = 0;
     }
-    if(jogador->coordenadas.y >= (height - 0.3*jogador->textura.height)){ //"" "" para baixo
+    if(jogador->coordenadas.y >= (height - 0.28*jogador->textura.height)){ //"" "" para baixo
         pode_s = 0;
     }
     
@@ -83,6 +83,7 @@ Player inicializarJogador() {
     jogador.textura = LoadTexture("Sprites e Texturas/sprite1.png");
     jogador.coordenadas = (Vector2) {width/2, height/2};
     jogador.score = 0;
+    jogador.centro = (Vector2) {(2*jogador.coordenadas.x + 0.33*jogador.textura.width)/2, (2*jogador.coordenadas.y + 0.33*jogador.textura.height)/2};
     //jogador.campoVisao = 150 + (50 * jogador.qtdBaterias);//raio = 1;
     return jogador;
 }
