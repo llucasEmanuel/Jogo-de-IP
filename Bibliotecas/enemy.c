@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
 #include "enemy.h"
 //#include "player.h"
 
@@ -20,6 +21,42 @@ Enemy *inicializarInimigos() {
     inimigos[0].detectouJogador = 0;
     return inimigos;
 }
+
+void moveInimigoCirculos(Enemy *inimigo) {//cria um padrao de movimentacao para o inimigo
+    
+    srand(time(NULL));
+    int x;
+    x = (rand() % 8) + 1; //gera numero de 1 a 8 pra decidir onde o cara vai (dobrei o numero de opcoes pra ver se ele n fica rodando em um quadrado so)
+   
+    int pode_direita = 1, pode_cima = 1, pode_baixo = 1, pode_esquerda = 1;
+    
+    if(inimigo[0].coordenadas.x >= 1700){
+        pode_direita = 0;
+    }
+    if(inimigo[0].coordenadas.x <= 30){
+        pode_esquerda = 0;
+    }
+    if(inimigo[0].coordenadas.y >= 950){
+        pode_baixo = 0;
+    }
+    if(inimigo[0].coordenadas.y <= 30){
+        pode_cima = 0;
+    }
+    
+    if((x == 1 || x == 5) && pode_direita == 1 ){ //direita
+        inimigo[0].coordenadas.x += sqrt(2);
+    }
+    if((x == 2 || x == 6) && pode_esquerda == 1 ){
+        inimigo[0].coordenadas.x -= sqrt(2);
+    }
+    if((x == 3 || x == 7) && pode_baixo == 1){
+        inimigo[0].coordenadas.y += sqrt(2);
+    }
+    if((x == 4 || x == 8) && pode_cima == 1){
+        inimigo[0].coordenadas.y -= sqrt(2);
+    }
+    
+} 
 
 void perseguirJogador(Enemy *inimigos, Player jogador) {//inimigo tbm anda na diagonal
 
@@ -82,6 +119,7 @@ void perseguirJogador(Enemy *inimigos, Player jogador) {//inimigo tbm anda na di
             else inimigos[0].coordenadas.y -= 3;
         }
     }
+    else{
+        moveInimigoCirculos(inimigos);
+    }
 }
-// void moveInimigoCirculos(Enemy *inimigo) {//cria um padrao de movimentacao para o inimigo 
-// } //opcional
