@@ -1,12 +1,15 @@
 #include <raylib.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "player.h"
 
 typedef struct {
     Texture textura;
     Vector2 coordenadas;
     Rectangle hitbox;
+    Vector2 centro;
+    int detectouJogador;
 } Enemy;
-//criar uma lista de strings com os paths para as texturas de cada inimigo
+
 Enemy *inicializarInimigos();
-Enemy *atualizarVetorInimigos(Enemy *inimigos, int *qtdInimigos);
+void perseguirJogador(Enemy *inimigo, Player jogador);
