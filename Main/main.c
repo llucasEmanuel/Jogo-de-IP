@@ -9,12 +9,6 @@
 #include "collectable.h"
 #include "enemy.h"
 
-/*O QUE AINDA FALTA*/
-//Fazer uma biblioteca para as colisoes
-//Ajustar o tamanho as hitboxes
-//Criar uma forma de passar de fase
-//Aumentar o numero de inimigos a cada fase
-
 typedef struct {
     Enemy *inimigos;
     Collectable chave;
@@ -46,8 +40,6 @@ int main() {
     
     SetTargetFPS(60);
     
-    char bateriasStr[] = "BATERIAS : 0";//11 == ind do char do digito
-    char chavesStr[] = "CHAVES : 0";//9 == ind do char do digito
     
     //FLAGS PARA CONTROLE DOS EVENTOS DA FASE
     int entrouNaPorta = 0;
@@ -55,6 +47,13 @@ int main() {
     
     //AUXILIAR MENU
     int continua = 0, continua1 = 0;
+    
+    //INICIALIZA A CAMERA
+    Camera2D camera = {0};
+    camera.target = jogador.centro;
+    camera.offset = (Vector2) {width/2, height/2};
+    camera.rotation = 0;
+    camera.zoom = 1;
 
     //INICIO DO LOOP EM QUE RODA O JOGO
     while(!WindowShouldClose()) {       
@@ -68,7 +67,7 @@ int main() {
 
             EndDrawing();
             
-            if (IsKeyPressed(KEY_SPACE)) {
+            if (IsKeyPressed(KEY_ESCAPE)) {//MUDAR PRA KEY_SPACE DPS
                 perdeu = 0;
                 //Reiniciar a fase
             }
@@ -83,7 +82,10 @@ int main() {
         }
        
         if(continua1 == 1 && continua == 1){ //Inicia Jogo
-     
+        
+            //atualiza a camera
+            camera.target = jogador.centro;
+            
             while (entrouNaPorta) {
                 
                 BeginDrawing();
@@ -91,19 +93,25 @@ int main() {
                 DrawText(TextFormat("HIGHSCORE : %d", jogador.score), width / 2 - MeasureText("HIGHSCORE : ", 75) / 2, height / 2 - 75, 75, BLACK);
                 EndDrawing();
              
-                if (IsKeyPressed(KEY_ESCAPE)) {
+                if (IsKeyPressed(KEY_ESCAPE)) {//MUDAR PRA KEY_SPACE DPS
                     entrouNaPorta = 0;
                 }
-            }
+            } 
+            
+          
             BeginDrawing();
-        
+            
             jogador.campoVisao = 150 + (35 * jogador.qtdBaterias);//raio do campo de visao
-            DrawCircle(jogador.hitbox.x + 46, jogador.hitbox.y + 40, jogador.campoVisao, WHITE);//campo de visao
+            //DrawCircle(camera.target.x, camera.target.y, jogador.campoVisao, WHITE);//campo de visao
             //atualiza o centro do jogador
             jogador.centro = (Vector2) {(2*jogador.coordenadas.x + 0.33*jogador.textura.width)/2, (2*jogador.coordenadas.y + 0.33*jogador.textura.height)/2};
             //atualiza o centro do inimigo
             fase.inimigos[0].centro = (Vector2) {(2*fase.inimigos[0].coordenadas.x + 8*fase.inimigos[0].textura.width)/2, (2*fase.inimigos[0].coordenadas.y + 8*fase.inimigos[0].textura.height)/2};
             ClearBackground(BLACK);
+            
+            
+            BeginMode2D(camera);//ativa a camera
+            DrawCircle(jogador.centro.x, jogador.centro.y, jogador.campoVisao, WHITE);
         
             DrawText("FASE 1", width / 2 - MeasureText("FASE 1", 40) / 2, height / 2 - 40, 40, BLACK);
           
@@ -113,7 +121,7 @@ int main() {
                 if (distCampoVisaoinimigoC < jogador.campoVisao) {//se tiver dentro do campo de visao
                     DrawTextureEx(fase.inimigos[0].textura, fase.inimigos[0].coordenadas, 0, 8, WHITE);
                 }
-                else DrawTextureEx(fase.inimigos[0].textura, fase.inimigos[0].coordenadas, 0, 8, BLACK);
+                else DrawTextureEx(fase.inimigos[0].textura, fase.inimigos[0].coordenadas, 0, 8, WHITE);
                 
                 DrawRectangle(fase.inimigos[0].hitbox.x, fase.inimigos[0].hitbox.y, fase.inimigos[0].hitbox.width, fase.inimigos[0].hitbox.height, BLANK);
             }
@@ -166,7 +174,7 @@ int main() {
                 if (distCampoVisaoPortaC < jogador.campoVisao) {
                     DrawTextureEx(fase.porta.textura, fase.porta.coordenadas, 0, 2.2, WHITE);
                 }
-                else DrawTextureEx(fase.porta.textura, fase.porta.coordenadas, 0, 2.2, BLACK);
+                else DrawTextureEx(fase.porta.textura, fase.porta.coordenadas, 0, 2.2,  BLACK);
                 
                 DrawRectangle(fase.porta.hitbox.x, fase.porta.hitbox.y, fase.porta.hitbox.width, fase.porta.hitbox.height, BLANK);
             }
@@ -203,7 +211,6 @@ int main() {
                 UnloadTexture(fase.chave.textura);//apaga a textura
                 fase.chave.hitbox = (Rectangle) {0, 0, 0, 0};//remove a hitbox
                 jogador.temChave = 1;//atualiza a flag do jogador
-                chavesStr[9]++;//atualiza a qtd chaves na tela
                 jogador.score += 200;
             }
          
@@ -218,7 +225,8 @@ int main() {
                     entrouNaPorta = 1;
                 }
                 else {
-                    DrawText("PORTA TRANCADA", width/2 - MeasureText("PORTA TRANCADA", 30), 60, 50, RED);
+                    DrawText("PORTA TRANCADA", fase.porta.coordenadas.x - 3*fase.porta.textura.width, fase.porta.coordenadas.y - 50, 40, RED);
+
                 }
             }
            
@@ -229,7 +237,6 @@ int main() {
                 if (CheckCollisionRecs(jogador.hitbox, fase.baterias[i].hitbox)) {
                     indColisoes[qtdColisoes] = i;//guarda os indices
                     qtdColisoes++;
-                    bateriasStr[11]++;//atualiza a qtd baterias na tela
                 }
             }
                 
@@ -249,10 +256,11 @@ int main() {
             }
 
             //GUARDAR CADA STRING EM UMA VARIAVEL DIFERENTE E SÓ SOMAR 1 NO CHAR DO DIGITO
-            DrawText(TextFormat("SCORE : %d", jogador.score), 30, 30, 40, GRAY);
-            DrawText(chavesStr, 30, 80, 40, GRAY);
-            DrawText(bateriasStr, 30, 130, 40, GRAY);
+            DrawText(TextFormat("SCORE : %d", jogador.score), camera.target.x - 900, camera.target.y - 500, 40, GRAY);
+            DrawText(TextFormat("CHAVES : %d", jogador.temChave), camera.target.x - 900, camera.target.y - 450, 40, GRAY);
+            DrawText(TextFormat("BATERIAS : %d", jogador.qtdBaterias), camera.target.x - 900, camera.target.y - 400, 40, GRAY);
 
+            EndMode2D();
             EndDrawing();  
             
         }
