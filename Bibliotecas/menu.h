@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include <stdio.h>
 
 typedef struct{
     Texture BG;
@@ -15,7 +16,14 @@ typedef struct{
     
 } Comando;
 
+typedef struct{
+    char nome[12];
+    int pontuacao;
+    int qtdPessoas;
+} Ranking;
+
 void iniciaMenu(Menu *menu);
 void iniciaComando(Comando *comando);
 Comando iniciaJogo(Comando comando);
 Menu desenhaMenu(Menu menu);
+Ranking *organizaRanking(FILE *arq);
