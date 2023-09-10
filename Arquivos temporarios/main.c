@@ -71,6 +71,11 @@ int main() {
     
     //AUXILIAR RANKING
     Ranking *ranking = NULL;
+    
+    //INICIALIZAR COLETAVEIS CONTADOREs
+    CollectableContador chave, bateria;
+    InicializaColetavelContador(&chave);
+    InicializaColetavelContador1(&bateria);
 
 
     //INICIO DO LOOP EM QUE RODA O JOGO
@@ -341,8 +346,14 @@ int main() {
 
             //GUARDAR CADA STRING EM UMA VARIAVEL DIFERENTE E SÓ SOMAR 1 NO CHAR DO DIGITO
             DrawText(TextFormat("SCORE : %d", jogador.score), camera.target.x - 900, camera.target.y - 500, 40, GRAY);
-            DrawText(TextFormat("CHAVES : %d", jogador.temChave), camera.target.x - 900, camera.target.y - 450, 40, GRAY);
-            DrawText(TextFormat("BATERIAS : %d", jogador.qtdBaterias), camera.target.x - 900, camera.target.y - 400, 40, GRAY);
+            chave.coordenadas.x = camera.target.x - 900;
+            chave.coordenadas.y = camera.target.y - 450;
+            DrawTextureEx(chave.textura, chave.coordenadas, 0, 2.5, WHITE);
+            DrawText(TextFormat(" x %d", jogador.temChave), camera.target.x - 900 + (2.5 * chave.textura.width), camera.target.y - 450, 40, GRAY);
+            bateria.coordenadas.x = camera.target.x - 900;
+            bateria.coordenadas.y = camera.target.y - 400;
+            DrawTextureEx(bateria.textura, bateria.coordenadas, 0, 3, WHITE);
+            DrawText(TextFormat(" x %d", jogador.qtdBaterias), camera.target.x - 900 + (3 * bateria.textura.width), camera.target.y - 390, 40, GRAY);
 
             EndMode2D();
             EndDrawing();  
@@ -354,6 +365,8 @@ int main() {
     UnloadTexture(jogador.textura);
     UnloadTexture(fase.chave.textura);
     UnloadTexture(fase.porta.textura);
+    UnloadTexture(chave.textura);
+    UnloadTexture(bateria.textura);
     //UnloadTexture(mapa);
     for (int i = 0; i < fase.qtdInimigos; i++) {
        UnloadTexture(fase.inimigos[i].textura); 
