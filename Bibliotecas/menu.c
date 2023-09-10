@@ -323,3 +323,36 @@ Comando iniciaJogo(Comando comando){
     
     return comando;
 }
+
+Ranking* organizaRanking(FILE *arq){
+    char nomeTemp[12];
+    int pontuacaoTemp;
+    int qtd = 0;
+    Ranking *ranking = NULL, *temp, troca;
+    
+    while(!feof(arq)){
+        fscanf(arq, " %[^,],%d ", nomeTemp, &pontuacaoTemp);
+        temp = ranking;
+        ranking = (Ranking *) realloc(temp, (qtd + 1) * sizeof(Ranking));
+        if(ranking == NULL){
+            printf("Falha na alocacao de memoria\n");
+            free(temp);
+            exit(1);
+        }
+        strcpy(ranking[qtd].nome, nomeTemp);
+        ranking[qtd].pontuacao = pontuacaoTemp;
+        qtd++;
+    }
+    
+    for(int i = 0; i < qtd; i++){
+        for(int j = i + 1; j < qtd; j++){
+            if(ranking[i].pontuacao < ranking[j].pontuacao){
+                troca = ranking[i];
+                ranking[i] = ranking[j];
+                ranking[j] = troca;
+            }
+        }
+    }
+    ranking[0].qtdPessoas = qtd;
+    return ranking;
+}
