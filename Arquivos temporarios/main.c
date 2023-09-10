@@ -68,6 +68,10 @@ int main() {
     camera.offset = (Vector2) {width/2, height/2};
     camera.rotation = 0;
     camera.zoom = 1;
+    
+    //AUXILIAR RANKING
+    Ranking *ranking = NULL;
+
 
     //INICIO DO LOOP EM QUE RODA O JOGO
     while(!WindowShouldClose()) { 
@@ -77,23 +81,38 @@ int main() {
             
             BeginDrawing();
             ClearBackground(RAYWHITE);
-            DrawText("PARABENS, VOCE SOBREVIVEU A UFPE... POR ENQUANTO", width / 2 - MeasureText("PARABENS, VOCE SOBREVIVEU A UFPE... POR ENQUANTO", 60) / 2, height / 2 - 60, 60, BLACK);
-            EndDrawing(); 
-
+            DrawText("PARABENS, VOCE SOBREVIVEU A UFPE... POR ENQUANTO", width / 2 - MeasureText("PARABENS, VOCE SOBREVIVEU A UFPE... POR ENQUANTO", 60) / 2, height / 2 - 200, 60, BLACK); 
+            DrawText("RANKING", width / 2 - 200, height / 2 - 100, 50, MAROON);
+             
             //SALVAR A PONTUACAO DO JOGADOR
-            FILE *file = fopen("highscore.txt", "a");
-            if (file == NULL) {
-                printf("Erro ao abrir o arquivo highscore.txt\n");
-                exit(1);
-            }
-            //salvando score e nome do jogador
             if (!gravouScore) {
+                FILE *file = fopen("highscore.txt", "a");
+                if (file == NULL) {
+                    printf("Erro ao abrir o arquivo highscore.txt\n");
+                    exit(1);
+                }
                 fprintf(file, "%s,%d\n", menu.nome, jogador.score);
+                fclose(file);
+                
+                //organizar o ranking
+                file = fopen("highscore.txt", "r");
+                if(file == NULL){
+                    printf("falha na leitura do arquivo.\n");
+                    exit(1);
+                }
+                ranking = organizaRanking(file);
                 fclose(file);
                 gravouScore = 1;
             }
+
+            for(int i = 0; i < ranking[0].qtdPessoas && i < 10; i++){
+                DrawText(TextFormat("%d. %s, %d", i + 1, ranking[i].nome, ranking[i].pontuacao), width/2 - 200, height / 2 + (50 * i) - 25, 40, BLACK);
+            }
+            EndDrawing();
+
             
         }
+        
 
         if (perdeu) {         
             SetSoundVolume(youDied, 2.5);
