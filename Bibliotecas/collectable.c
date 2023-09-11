@@ -70,3 +70,13 @@ Collectable inicializarPorta() {
     porta.colisao = 0;
     return porta;
 }
+
+void InicializaColetavelContador(CollectableContador *mini){
+    
+    (*mini).textura = LoadTexture("Sprites e Texturas/spriteChave2.png");
+}
+
+void InicializaColetavelContador1(CollectableContador *mini1){
+    
+    (*mini1).textura = LoadTexture("Sprites e Texturas/spriteBateria.png");
+}
