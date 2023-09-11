@@ -16,37 +16,55 @@ typedef struct {
     Collectable *baterias;
     int qtdBaterias;
     int qtdInimigos;
+    int faseAtual;
 } Fase;
 
-Fase criarFase();
+Fase criarFase(int numFase);
+void reiniciarFase(Player *jogador, Fase *fase);
+void passarDeFase(Player *jogador, Fase *fase);
 
 int main() {
     
     srand(time(NULL));
     
-    InitWindow(1920, 1080, "Jogo de IP");
+    InitWindow(1920, 1080, "FNAU");
     //if (!IsWindowFullscreen()) ToggleFullscreen();
     int height = GetScreenHeight();
     int width = GetScreenWidth();
     
     Player jogador = inicializarJogador();//inicializa jogador fora do criarFase para manter o score para as outras fases
-    Fase fase = criarFase();
-    fase.qtdInimigos = 1;
+    Fase fase = criarFase(1);
+    //INICIALIZACAO DOS INIMIGOS FORA DO DOMINIO DA FASE
+    //Enemy *vetorInimigos = inicializarInimigos();//guarda os inimigos
+    int qtdInimigos = 1;
+    
+    //fase.inimigos = vetorInimigos;
+    //Texture mapa = LoadTexture("Sprites e Texturas/mapa.png");
+    fase.qtdInimigos = qtdInimigos;
     
     //INICIALIZACAO DOS SONS
     InitAudioDevice();
-    Sound musica = LoadSound("Sons e Musica/Spooked - Mini Vandals.mp3");
-    //PlaySound(musica);
+    Music musica = LoadMusicStream("Sons e Musica/Spooked - Mini Vandals.mp3");
+    Sound youDied = LoadSound("Sons e Musica/you_died_DS.mp3");
+    Sound musicaEncerramento = LoadSound("Sons e Musica/Dramatic Series Theme - Freedom Trail Studio.mp3");
+    Sound musicaPerseguicao = LoadSound("Sons e Musica/Funeral in Sinaloa - Jimena Contreras.mp3");
+    PlayMusicStream(musica);
+    int musicaTocando = 0;//musica de perseguicao
+    int musicaDelay = 0;
     
     SetTargetFPS(60);
     
-    
+    //
+    Font fonteDS = LoadFont("OptimusPrinceps.ttf");
     //FLAGS PARA CONTROLE DOS EVENTOS DA FASE
     int entrouNaPorta = 0;
     int perdeu = 0;
     
     //AUXILIAR MENU
-    int continua = 0, continua1 = 0;
+    Menu menu;
+    Comando comando;
+    iniciaMenu(&menu);
+    iniciaComando(&comando);
     
     //INICIALIZA A CAMERA
     Camera2D camera = {0};
@@ -54,51 +72,139 @@ int main() {
     camera.offset = (Vector2) {width/2, height/2};
     camera.rotation = 0;
     camera.zoom = 1;
+    
+    //AUXILIAR RANKING
+    Ranking *ranking = NULL;
+    
+    //INICIALIZAR COLETAVEIS CONTADOREs
+    CollectableContador chave, bateria;
+    InicializaColetavelContador(&chave);
+    InicializaColetavelContador1(&bateria);
+
 
     //INICIO DO LOOP EM QUE RODA O JOGO
-    while(!WindowShouldClose()) {       
+    while(!WindowShouldClose()) { 
+        
+        UpdateMusicStream(musica);
 
-        while (perdeu) {//
+        int gravouScore = 0;//garante que nao vai gravar o score varias vezes no loop
+        while (fase.faseAtual > 5 && !IsKeyDown(KEY_ESCAPE)) {
             
             BeginDrawing();
-            ClearBackground(WHITE);
+            ClearBackground(RAYWHITE);
+            DrawText("PARABENS, VOCE SOBREVIVEU A UFPE...", width / 2 - MeasureText("PARABENS, VOCE SOBREVIVEU A UFPE...", 60) / 2, height / 2 - 450, 60, BLACK); 
+            DrawText("POR ENQUANTO!", width / 2 - MeasureText("POR ENQUANTO!", 90) / 2, height / 2 - 350, 90, MAROON); 
 
-            DrawText("PAULO SALGADO NÃO IRÁ... NÃO IRÁ NOS SALVAR", width / 2 - MeasureText("PAULO SALGADO NÃO IRÁ... NÃO IRA NOS SALVAR", 70) / 2, height / 2 - 70, 70, BLACK);
+            DrawText("RANKING", width / 2 - 150, height / 2 - 125, 50, MAROON);
+             
+            //SALVAR A PONTUACAO DO JOGADOR
+            if (!gravouScore) {
+                StopMusicStream(musica);
+                if (musicaTocando) {
+                    StopSound(musicaPerseguicao);
+                    musicaTocando = 0;
+                }
+                PlaySound(musicaEncerramento);
+                SetSoundVolume(musicaEncerramento, 0.8);
+                FILE *file = fopen("highscore.txt", "a");
+                if (file == NULL) {
+                    printf("Erro ao abrir o arquivo highscore.txt\n");
+                    exit(1);
+                }
+                fprintf(file, "%s,%d\n", menu.nome, jogador.score);
+                fclose(file);
+                
+                //organizar o ranking
+                file = fopen("highscore.txt", "r");
+                if(file == NULL){
+                    printf("falha na leitura do arquivo.\n");
+                    exit(1);
+                }
+                ranking = organizaRanking(file);
+                fclose(file);
+                gravouScore = 1;
+            }
 
+            for(int i = 0; i < ranking[0].qtdPessoas && i < 10; i++){
+                DrawText(TextFormat("%d. %s - %d", i + 1, ranking[i].nome, ranking[i].pontuacao), width/2 - 200, height / 2 + (50 * i) - 25, 40, BLACK);
+            }
             EndDrawing();
+
+        }
+        
+
+        if (perdeu) {  
+            StopMusicStream(musica);
+            SetSoundVolume(youDied, 2.5);
+            PlaySound(youDied);
             
-            if (IsKeyPressed(KEY_ESCAPE)) {//MUDAR PRA KEY_SPACE DPS
-                perdeu = 0;
-                //Reiniciar a fase
+            if (jogador.score >= 200) jogador.score -= 200;//perde 200 pontos toda vez que morre
+            else (jogador.score) = 0;
+            
+            while (perdeu) {
+               
+                if (musicaTocando) {
+                    StopSound(musicaPerseguicao);
+                    musicaTocando = 0;
+                }
+               
+                BeginDrawing();
+                ClearBackground(BLACK);
+                DrawTextEx(fonteDS, "PAULO SALGADO NAO IRA ... NAO IRA NOS SALVAR", (Vector2) {width / 2 - MeasureText("PAULO SALGADO NAO IRA ... NAO IRA NOS SALVAR", 70)/ 2 + 25, height / 2 - 70}, 70, 3, MAROON);
+                DrawText("Aperte [SPACE] para continuar", width/2 - MeasureText("Aperte [SPACE] para continuar", 50)/2, 980, 50, GRAY);
+                
+                EndDrawing();
+                
+                if (IsKeyPressed(KEY_SPACE)) {
+                    StopSound(youDied);
+                    perdeu = 0;
+                    //Reiniciar a fase
+                    reiniciarFase(&jogador, &fase);
+                    PlayMusicStream(musica);
+                    //fase.inimigos = inicializarInimigos();
+                }
             }
         }
         
-        if(continua == 0 && continua1 == 0){ //Chama a primeira parte do menu
-           continua = geraMenu();
+        if(menu.continua == 0 && comando.continua == 0){ //Chama a primeira parte do menu
+           menu = desenhaMenu(menu);
         }
        
-        if(continua == 1 && continua1 == 0){ //Chama a parte dos comandos
-           continua1 = iniciaJogo();
+        if(menu.continua == 1 && comando.continua == 0){ //Chama a parte dos comandos
+           comando = iniciaJogo(comando);
         }
        
-        if(continua1 == 1 && continua == 1){ //Inicia Jogo
+        if(menu.continua == 1 && comando.continua == 1){ //Inicia Jogo
         
             //atualiza a camera
             camera.target = jogador.centro;
             
             while (entrouNaPorta) {
                 
+                if (musicaTocando) {
+                    StopSound(musicaPerseguicao);
+                    musicaTocando = 0;
+                }
+                
                 BeginDrawing();
                 ClearBackground(WHITE);
                 DrawText(TextFormat("HIGHSCORE : %d", jogador.score), width / 2 - MeasureText("HIGHSCORE : ", 75) / 2, height / 2 - 75, 75, BLACK);
                 EndDrawing();
-             
-                if (IsKeyPressed(KEY_ESCAPE)) {//MUDAR PRA KEY_SPACE DPS
-                    entrouNaPorta = 0;
+                int tempScore = jogador.score;
+                if (IsKeyPressed(KEY_SPACE)) {//MUDAR PRA KEY_SPACE DPS
+ 
+                    //qtdInimigos++;
+                    reiniciarFase(&jogador, &fase);
+                    PlayMusicStream(musica);
+                    //fase.inimigos = inicializarInimigos();
+                    entrouNaPorta = 0;    
+                    fase.faseAtual++;
+                    //fase.inimigos = atualizarVetorInimigos(fase.inimigos, &qtdInimigos);
+                    //fase.qtdInimigos = qtdInimigos;
+                    //printf("QTD INIMIGOS = %d\n", qtdInimigos);
                 }
             } 
-            
-          
+
             BeginDrawing();
             
             jogador.campoVisao = 150 + (35 * jogador.qtdBaterias);//raio do campo de visao
@@ -106,24 +212,46 @@ int main() {
             //atualiza o centro do jogador
             jogador.centro = (Vector2) {(2*jogador.coordenadas.x + 0.33*jogador.textura.width)/2, (2*jogador.coordenadas.y + 0.33*jogador.textura.height)/2};
             //atualiza o centro do inimigo
-            fase.inimigos[0].centro = (Vector2) {(2*fase.inimigos[0].coordenadas.x + 8*fase.inimigos[0].textura.width)/2, (2*fase.inimigos[0].coordenadas.y + 8*fase.inimigos[0].textura.height)/2};
+            //for (int i = 0; i < fase.qtdInimigos; i++) {
+                fase.inimigos[0].centro = (Vector2) {(2*fase.inimigos[0].coordenadas.x + 8*fase.inimigos[0].textura.width)/2, (2*fase.inimigos[0].coordenadas.y + 8*fase.inimigos[0].textura.height)/2};
+            //}
             ClearBackground(BLACK);
             
             
             BeginMode2D(camera);//ativa a camera
+            //DrawTextureEx(mapa, (Vector2) {0, 0}, 0, 1, WHITE);
             DrawCircle(jogador.centro.x, jogador.centro.y, jogador.campoVisao, WHITE);
         
-            DrawText("FASE 1", width / 2 - MeasureText("FASE 1", 40) / 2, height / 2 - 40, 40, BLACK);
+            DrawText(TextFormat("FASE %d", fase.faseAtual), width / 2 - MeasureText("FASE 1", 40) / 2, height / 2 - 40, 40, BLACK);
           
             //DESENHA INIMIGOS
             if (!perdeu) {
-                float distCampoVisaoinimigoC = sqrt(pow(jogador.centro.x - fase.inimigos[0].centro.x, 2) + pow(jogador.centro.y - fase.inimigos[0].centro.y, 2));
-                if (distCampoVisaoinimigoC < jogador.campoVisao) {//se tiver dentro do campo de visao
-                    DrawTextureEx(fase.inimigos[0].textura, fase.inimigos[0].coordenadas, 0, 8, WHITE);
-                }
-                else DrawTextureEx(fase.inimigos[0].textura, fase.inimigos[0].coordenadas, 0, 8, WHITE);
-                
-                DrawRectangle(fase.inimigos[0].hitbox.x, fase.inimigos[0].hitbox.y, fase.inimigos[0].hitbox.width, fase.inimigos[0].hitbox.height, BLANK);
+                //for (int i = 0; i < fase.qtdInimigos; i++) {
+                    float distCampoVisaoinimigoC = sqrt(pow(jogador.centro.x - fase.inimigos[0].centro.x, 2) + pow(jogador.centro.y - fase.inimigos[0].centro.y, 2));
+                    if (distCampoVisaoinimigoC < jogador.campoVisao) {//se tiver dentro do campo de visao
+                        if (!musicaTocando) {
+                            PauseMusicStream(musica);
+                            PlaySound(musicaPerseguicao);
+                            SetSoundVolume(musicaPerseguicao, 0.6);
+                            musicaTocando = 1;
+                            musicaDelay = 300;//num de frames (5 segundos)
+                        }
+                        DrawTextureEx(fase.inimigos[0].textura, fase.inimigos[0].coordenadas, 0, 8, WHITE);
+                    }
+                    else { 
+                        if (musicaTocando) {
+                            if (musicaDelay > 0) musicaDelay--;
+                            else {   
+                                ResumeMusicStream(musica);//continua de onde parou
+                                StopSound(musicaPerseguicao);
+                                musicaTocando = 0;
+                            }
+                        }
+                        DrawTextureEx(fase.inimigos[0].textura, fase.inimigos[0].coordenadas, 0, 8, WHITE);
+                    }
+                    
+                    DrawRectangle(fase.inimigos[0].hitbox.x, fase.inimigos[0].hitbox.y, fase.inimigos[0].hitbox.width, fase.inimigos[0].hitbox.height, BLANK);
+                //}
             }
            
             //DESENHA A TEXTURA DAS BATERIAS 
@@ -147,7 +275,7 @@ int main() {
                 if (distCampoVisaoChaveC < jogador.campoVisao) {
                     DrawTextureEx(fase.chave.textura, fase.chave.coordenadas, 0, 2.5, WHITE);
                 }
-                else DrawTextureEx(fase.chave.textura, fase.chave.coordenadas, 0, 2.5, BLACK);
+                else DrawTextureEx(fase.chave.textura, fase.chave.coordenadas, 0, 2.5, WHITE);
                 
                 DrawRectangle(fase.chave.hitbox.x, fase.chave.hitbox.y, fase.chave.hitbox.width, fase.chave.hitbox.height, BLANK);
             }
@@ -161,12 +289,14 @@ int main() {
             };
           
             //hitbox dinamica para o inimigo
-            fase.inimigos[0].hitbox = (Rectangle) {
-                fase.inimigos[0].coordenadas.x + 5,
-                fase.inimigos[0].coordenadas.y,
-                108,
-                165,
-            };
+            //for (int i = 0; i < fase.qtdInimigos; i++) {
+                fase.inimigos[0].hitbox = (Rectangle) {
+                    fase.inimigos[0].coordenadas.x + 5,
+                    fase.inimigos[0].coordenadas.y,
+                    108,
+                    165,
+                };
+            //}
           
             float distCampoVisaoPortaC = sqrt(pow((2*jogador.coordenadas.x + 0.33*jogador.textura.width)/2 - (2*fase.porta.coordenadas.x + 2.2*fase.porta.textura.width)/2, 2)
             + pow((2*jogador.coordenadas.y + 0.33*jogador.textura.height)/2 - (2*fase.porta.coordenadas.y + 2.2*fase.porta.textura.height)/2, 2));
@@ -189,20 +319,23 @@ int main() {
                 if (distCampoVisaoPortaC < jogador.campoVisao) {
                     DrawTextureEx(fase.porta.textura, fase.porta.coordenadas, 0, 2.2, WHITE);
                 }
-                else DrawTextureEx(fase.porta.textura, fase.porta.coordenadas, 0, 2.2, BLACK);
+                else DrawTextureEx(fase.porta.textura, fase.porta.coordenadas, 0, 2.2, WHITE);
                 
                 DrawRectangle(fase.porta.hitbox.x, fase.porta.hitbox.y, fase.porta.hitbox.width, fase.porta.hitbox.height, BLANK);
             }
 
             moverJogador(&jogador);
-            perseguirJogador(fase.inimigos, jogador);
+            perseguirJogador(fase.inimigos, jogador, fase.qtdInimigos);
+          
             
-            if (CheckCollisionRecs(jogador.hitbox, fase.inimigos[0].hitbox)) {
-                printf("Colisao INIMIGO");
-                UnloadTexture(jogador.textura);
-                jogador.hitbox = (Rectangle) {0, 0, 0, 0};
-                perdeu = 1;
-            }
+            //for (int i = 0; i < fase.qtdInimigos; i++) {
+                if (CheckCollisionRecs(jogador.hitbox, fase.inimigos[0].hitbox)) {
+                    printf("Colisao INIMIGO\n");
+                    UnloadTexture(jogador.textura);
+                    jogador.hitbox = (Rectangle) {0, 0, 0, 0};
+                    perdeu = 1;
+                }
+            //}
            
             //CHECA SE HOUVE COLISAO COM A CHAVE
             if (CheckCollisionRecs(jogador.hitbox, fase.chave.hitbox)) {
@@ -255,10 +388,15 @@ int main() {
                 }
             }
 
-            //GUARDAR CADA STRING EM UMA VARIAVEL DIFERENTE E SÓ SOMAR 1 NO CHAR DO DIGITO
             DrawText(TextFormat("SCORE : %d", jogador.score), camera.target.x - 900, camera.target.y - 500, 40, GRAY);
-            DrawText(TextFormat("CHAVES : %d", jogador.temChave), camera.target.x - 900, camera.target.y - 450, 40, GRAY);
-            DrawText(TextFormat("BATERIAS : %d", jogador.qtdBaterias), camera.target.x - 900, camera.target.y - 400, 40, GRAY);
+            chave.coordenadas.x = camera.target.x - 900;
+            chave.coordenadas.y = camera.target.y - 450;
+            DrawTextureEx(chave.textura, chave.coordenadas, 0, 2.5, WHITE);
+            DrawText(TextFormat(" x %d", jogador.temChave), camera.target.x - 900 + (2.5 * chave.textura.width), camera.target.y - 450, 40, GRAY);
+            bateria.coordenadas.x = camera.target.x - 900;
+            bateria.coordenadas.y = camera.target.y - 400;
+            DrawTextureEx(bateria.textura, bateria.coordenadas, 0, 3, WHITE);
+            DrawText(TextFormat(" x %d", jogador.qtdBaterias), camera.target.x - 900 + (3 * bateria.textura.width), camera.target.y - 390, 40, GRAY);
 
             EndMode2D();
             EndDrawing();  
@@ -267,15 +405,25 @@ int main() {
     }
 
     //DESALOCA OS PONTEIROS, APAGA AS TEXTURAS E DESATIVA AS FUNCOES DE AUDIO
+    UnloadMusicStream(musica);
+    UnloadSound(musicaEncerramento);
+    UnloadSound(musicaPerseguicao);
+    UnloadSound(youDied);
+    
     UnloadTexture(jogador.textura);
     UnloadTexture(fase.chave.textura);
     UnloadTexture(fase.porta.textura);
-    for (int i = 0; i < fase.qtdInimigos; i++) {
+    UnloadTexture(chave.textura);
+    UnloadTexture(bateria.textura);
+    //UnloadTexture(mapa);
+    for (int i = 0; i < qtdInimigos; i++) {
        UnloadTexture(fase.inimigos[i].textura); 
     }
     for (int i = 0; i < fase.qtdBaterias; i++) {
        UnloadTexture(fase.baterias[i].textura); 
     }
+    free(fase.inimigos);
+    UnloadFont(fonteDS);
     free(fase.baterias);
     CloseAudioDevice();
     CloseWindow();
@@ -283,13 +431,13 @@ int main() {
     return 0; 
 }
 
-Fase criarFase() {//usa o endereco do jogador para poder alterar a posicao e outros fatores
+Fase criarFase(int numFase) {//usa o endereco do jogador para poder alterar a posicao e outros fatores
     
     int height = GetScreenHeight();
     int width = GetScreenWidth();
 
     Fase fase;
-    //INICIALIZACAO DOS INIMIGOS
+    
     fase.inimigos = inicializarInimigos();
  
     //INICIALIZACAO DAS BATERIAS
@@ -301,6 +449,18 @@ Fase criarFase() {//usa o endereco do jogador para poder alterar a posicao e out
     
     //INICIALIZACAO DA PORTA DE SAIDA
     fase.porta = inicializarPorta();
+    fase.faseAtual = numFase;
     
     return fase;
+}
+
+void reiniciarFase(Player *jogador, Fase *fase) {
+    int width = GetScreenWidth();
+    int height = GetScreenHeight();
+    jogador->textura = LoadTexture("Sprites e Texturas/sprite1.png");
+    jogador->coordenadas = (Vector2){width/2, height/2};
+    jogador->qtdBaterias = 0;
+    jogador->temChave = 0;
+    // Redefina a fase para o estado inicial
+    (*fase) = criarFase(fase->faseAtual);
 }
