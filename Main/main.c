@@ -21,7 +21,6 @@ typedef struct {
 
 Fase criarFase(int numFase);
 void reiniciarFase(Player *jogador, Fase *fase);
-void passarDeFase(Player *jogador, Fase *fase);
 
 int main() {
     
@@ -59,6 +58,7 @@ int main() {
     //FLAGS PARA CONTROLE DOS EVENTOS DA FASE
     int entrouNaPorta = 0;
     int perdeu = 0;
+    int deathCount = 0;
     
     //AUXILIAR MENU
     Menu menu;
@@ -96,7 +96,7 @@ int main() {
             DrawText("POR ENQUANTO!", width / 2 - MeasureText("POR ENQUANTO!", 90) / 2, height / 2 - 350, 90, MAROON); 
 
             DrawText("RANKING", width / 2 - 150, height / 2 - 125, 50, MAROON);
-             
+           
             //SALVAR A PONTUACAO DO JOGADOR
             if (!gravouScore) {
                 StopMusicStream(musica);
@@ -150,7 +150,11 @@ int main() {
                
                 BeginDrawing();
                 ClearBackground(BLACK);
+          
                 DrawTextEx(fonteDS, "PAULO SALGADO NAO IRA ... NAO IRA NOS SALVAR", (Vector2) {width / 2 - MeasureText("PAULO SALGADO NAO IRA ... NAO IRA NOS SALVAR", 70)/ 2 + 25, height / 2 - 70}, 70, 3, MAROON);
+                //else if (fase.faseAtual == 2)
+                   // DrawTextEx(fonteDS, "NIVAN NAO IRA ... NAO IRA NOS SALVAR", (Vector2) {width / 2 - MeasureText("NIVAN NAO IRA ... NAO IRA NOS SALVAR", 70)/ 2 + 25, height / 2 - 70}, 70, 3, MAROON);
+
                 DrawText("Aperte [SPACE] para continuar", width/2 - MeasureText("Aperte [SPACE] para continuar", 50)/2, 980, 50, GRAY);
                 
                 EndDrawing();
@@ -158,6 +162,7 @@ int main() {
                 if (IsKeyPressed(KEY_SPACE)) {
                     StopSound(youDied);
                     perdeu = 0;
+                    
                     //Reiniciar a fase
                     reiniciarFase(&jogador, &fase);
                     PlayMusicStream(musica);
@@ -179,6 +184,8 @@ int main() {
             //atualiza a camera
             camera.target = jogador.centro;
             
+            int tamBarra = 240 - 80*deathCount;
+            
             while (entrouNaPorta) {
                 
                 if (musicaTocando) {
@@ -190,7 +197,6 @@ int main() {
                 ClearBackground(WHITE);
                 DrawText(TextFormat("HIGHSCORE : %d", jogador.score), width / 2 - MeasureText("HIGHSCORE : ", 75) / 2, height / 2 - 75, 75, BLACK);
                 EndDrawing();
-                int tempScore = jogador.score;
                 if (IsKeyPressed(KEY_SPACE)) {//MUDAR PRA KEY_SPACE DPS
  
                     //qtdInimigos++;
@@ -220,9 +226,39 @@ int main() {
             
             BeginMode2D(camera);//ativa a camera
             //DrawTextureEx(mapa, (Vector2) {0, 0}, 0, 1, WHITE);
-            DrawCircle(jogador.centro.x, jogador.centro.y, jogador.campoVisao, WHITE);
-        
-            DrawText(TextFormat("FASE %d", fase.faseAtual), width / 2 - MeasureText("FASE 1", 40) / 2, height / 2 - 40, 40, BLACK);
+            
+            //DEFINE A COR BASE DE CADA FASE
+            Color cores[5] = {WHITE, RED, SKYBLUE, ORANGE, GRAY};
+            Color cor;
+            switch (fase.faseAtual) {
+                case 1:
+                    cor = cores[0];
+                    break;
+                case 2:
+                    cor = cores[1];
+                    break;
+                case 3:
+                    cor = cores[2];
+                    break;
+                case 4:
+                    cor = cores[3];
+                    break;
+                case 5:
+                    cor = cores[4];
+                    break;
+                default:
+                    cor = BLACK;
+                    break;
+            }
+            
+            DrawCircle(jogador.centro.x, jogador.centro.y, jogador.campoVisao, cor);
+            
+            
+            //MARCADORES DOS LIMITES DA FASE
+            DrawLine(0, 0, width, 0, BLACK);
+            DrawLine(width, 0, width, height, BLACK);
+            DrawLine(width, height, 0, height, BLACK);
+            DrawLine(0, height, 0, 0, BLACK);
           
             //DESENHA INIMIGOS
             if (!perdeu) {
@@ -268,18 +304,6 @@ int main() {
                 }
             }
             
-            //DESENHA A TEXTURA DA CHAVE
-            float distCampoVisaoChaveC = sqrt(pow((2*jogador.coordenadas.x + 0.33*jogador.textura.width)/2 - (2*fase.chave.coordenadas.x + 2.5*fase.chave.textura.width)/2, 2)
-            + pow((2*jogador.coordenadas.y + 0.33*jogador.textura.height)/2 - (2*fase.chave.coordenadas.y + 2.5*fase.chave.textura.height)/2, 2));
-            if (!jogador.temChave) {
-                if (distCampoVisaoChaveC < jogador.campoVisao) {
-                    DrawTextureEx(fase.chave.textura, fase.chave.coordenadas, 0, 2.5, WHITE);
-                }
-                else DrawTextureEx(fase.chave.textura, fase.chave.coordenadas, 0, 2.5, WHITE);
-                
-                DrawRectangle(fase.chave.hitbox.x, fase.chave.hitbox.y, fase.chave.hitbox.width, fase.chave.hitbox.height, BLANK);
-            }
-           
             //hitbox dinamica que se move conforme o sprite do jogador
             jogador.hitbox = (Rectangle) {
                 jogador.coordenadas.x + 18,
@@ -297,7 +321,8 @@ int main() {
                     165,
                 };
             //}
-          
+            
+            //DESENHA DE TEXTURA DA PORTA
             float distCampoVisaoPortaC = sqrt(pow((2*jogador.coordenadas.x + 0.33*jogador.textura.width)/2 - (2*fase.porta.coordenadas.x + 2.2*fase.porta.textura.width)/2, 2)
             + pow((2*jogador.coordenadas.y + 0.33*jogador.textura.height)/2 - (2*fase.porta.coordenadas.y + 2.2*fase.porta.textura.height)/2, 2));
             if (!jogador.temChave) {//desenha antes se o jogador nao tiver a chave
@@ -307,6 +332,18 @@ int main() {
                 else DrawTextureEx(fase.porta.textura, fase.porta.coordenadas, 0, 2.2,  BLACK);
                 
                 DrawRectangle(fase.porta.hitbox.x, fase.porta.hitbox.y, fase.porta.hitbox.width, fase.porta.hitbox.height, BLANK);
+            }
+            
+            //DESENHA TEXTURA DA CHAVE
+            float distCampoVisaoChaveC = sqrt(pow((2*jogador.coordenadas.x + 0.33*jogador.textura.width)/2 - (2*fase.chave.coordenadas.x + 2.5*fase.chave.textura.width)/2, 2)
+            + pow((2*jogador.coordenadas.y + 0.33*jogador.textura.height)/2 - (2*fase.chave.coordenadas.y + 2.5*fase.chave.textura.height)/2, 2));
+            if (!jogador.temChave) {
+                if (distCampoVisaoChaveC < jogador.campoVisao) {
+                    DrawTextureEx(fase.chave.textura, fase.chave.coordenadas, 0, 2.5, WHITE);
+                }
+                else DrawTextureEx(fase.chave.textura, fase.chave.coordenadas, 0, 2.5, BLACK);
+                
+                DrawRectangle(fase.chave.hitbox.x, fase.chave.hitbox.y, fase.chave.hitbox.width, fase.chave.hitbox.height, BLANK);
             }
                 
             //DESENHA A TEXTURA DO JOGADOR
@@ -319,7 +356,7 @@ int main() {
                 if (distCampoVisaoPortaC < jogador.campoVisao) {
                     DrawTextureEx(fase.porta.textura, fase.porta.coordenadas, 0, 2.2, WHITE);
                 }
-                else DrawTextureEx(fase.porta.textura, fase.porta.coordenadas, 0, 2.2, WHITE);
+                else DrawTextureEx(fase.porta.textura, fase.porta.coordenadas, 0, 2.2, BLACK);
                 
                 DrawRectangle(fase.porta.hitbox.x, fase.porta.hitbox.y, fase.porta.hitbox.width, fase.porta.hitbox.height, BLANK);
             }
@@ -330,15 +367,21 @@ int main() {
             
             //for (int i = 0; i < fase.qtdInimigos; i++) {
                 if (CheckCollisionRecs(jogador.hitbox, fase.inimigos[0].hitbox)) {
+                    DrawTextureEx(jogador.textura, jogador.coordenadas, 0, 0.33, cor);
                     printf("Colisao INIMIGO\n");
                     UnloadTexture(jogador.textura);
                     jogador.hitbox = (Rectangle) {0, 0, 0, 0};
                     perdeu = 1;
+                    deathCount++;
+                    // if (tamBarra == 0) {
+                        // gameOver();
+                    // }
                 }
             //}
            
             //CHECA SE HOUVE COLISAO COM A CHAVE
             if (CheckCollisionRecs(jogador.hitbox, fase.chave.hitbox)) {
+                DrawTextureEx(fase.chave.textura, fase.chave.coordenadas, 0, 2.5, cor);
                 fase.chave.colisao = 1;
                 printf("Colisao CHAVE\n");
                 UnloadTexture(fase.chave.textura);//apaga a textura
@@ -350,6 +393,7 @@ int main() {
             //CHECA SE HOUVE COLISAO COM A PORTA
             if (CheckCollisionRecs(jogador.hitbox, fase.porta.hitbox)) {
                 if (jogador.temChave) {
+                    DrawTextureEx(fase.porta.textura, fase.porta.coordenadas, 0, 2.2, cor);
                     fase.porta.colisao = 1;
                     printf("Colisao PORTA\n");
                     UnloadTexture(fase.porta.textura);
@@ -358,8 +402,10 @@ int main() {
                     entrouNaPorta = 1;
                 }
                 else {
-                    DrawText("PORTA TRANCADA", fase.porta.coordenadas.x - 3*fase.porta.textura.width, fase.porta.coordenadas.y - 50, 40, RED);
-
+                    if (fase.faseAtual != 2)
+                        DrawText("PORTA TRANCADA", fase.porta.coordenadas.x - 3*fase.porta.textura.width, fase.porta.coordenadas.y - 50, 40, RED);
+                    else 
+                        DrawText("PORTA TRANCADA", fase.porta.coordenadas.x - 3*fase.porta.textura.width, fase.porta.coordenadas.y - 50, 40, RAYWHITE);
                 }
             }
            
@@ -368,6 +414,7 @@ int main() {
             int qtdColisoes = 0;//qtd de baterias obtidas
             for (int i = 0; i < fase.qtdBaterias; i++) {
                 if (CheckCollisionRecs(jogador.hitbox, fase.baterias[i].hitbox)) {
+                    DrawTextureEx(fase.baterias[i].textura, fase.baterias[i].coordenadas, 0, 3, cor);
                     indColisoes[qtdColisoes] = i;//guarda os indices
                     qtdColisoes++;
                 }
@@ -388,6 +435,14 @@ int main() {
                 }
             }
 
+            //DESENHAR BARRA DE SANIDADE (A CADA MORTE ELA AUMENTA 1/3)
+            DrawRectangle(camera.target.x - 120, camera.target.y - 450, 250, 40, GRAY);
+            DrawRectangle(camera.target.x - 115, camera.target.y - 446, tamBarra, 32, RED);
+            //
+
+
+            
+            DrawText(TextFormat("NOITE %d", fase.faseAtual), camera.target.x - MeasureText("NOITE 1", 40) / 2, camera.target.y + 400, 40, GRAY);
             DrawText(TextFormat("SCORE : %d", jogador.score), camera.target.x - 900, camera.target.y - 500, 40, GRAY);
             chave.coordenadas.x = camera.target.x - 900;
             chave.coordenadas.y = camera.target.y - 450;
@@ -400,7 +455,6 @@ int main() {
 
             EndMode2D();
             EndDrawing();  
-            
         }
     }
 
@@ -433,8 +487,6 @@ int main() {
 
 Fase criarFase(int numFase) {//usa o endereco do jogador para poder alterar a posicao e outros fatores
     
-    int height = GetScreenHeight();
-    int width = GetScreenWidth();
 
     Fase fase;
     
