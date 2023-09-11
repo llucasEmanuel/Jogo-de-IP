@@ -12,5 +12,6 @@ typedef struct {
 } Enemy;
 
 Enemy *inicializarInimigos();
-void moveInimigoCirculos(Enemy *inimigo);
-void perseguirJogador(Enemy *inimigo, Player jogador);
+Enemy *atualizarVetorInimigos(Enemy *inimigos, int *qtdInimigos);
+void moveInimigoCirculos(Enemy *inimigo, int qtdInimigos);
+void perseguirJogador(Enemy *inimigo, Player jogador, int qtdInimigos);
