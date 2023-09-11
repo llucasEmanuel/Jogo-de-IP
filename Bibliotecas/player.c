@@ -7,6 +7,7 @@ void moverJogador(Player *jogador) { //TUDO CONFIGURADO LEVANDO EM CONSIDERACAO 
     int height = GetScreenHeight();
     int width = GetScreenWidth();
     
+    //medir limites do mapa
     if(jogador->coordenadas.x <= -20){ //quando passa de um certo ponto, limita o movimento para esquerda
         pode_a = 0;
     }
@@ -19,6 +20,7 @@ void moverJogador(Player *jogador) { //TUDO CONFIGURADO LEVANDO EM CONSIDERACAO 
     if(jogador->coordenadas.y >= (height - 0.28*jogador->textura.height)){ //"" "" para baixo
         pode_s = 0;
     }
+    
     
     if (IsKeyDown(KEY_W) && pode_w == 1) {
         if (IsKeyDown(KEY_D) && pode_d == 1) {
