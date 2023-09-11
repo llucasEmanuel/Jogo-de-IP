@@ -59,6 +59,7 @@ int main() {
     int entrouNaPorta = 0;
     int perdeu = 0;
     int deathCount = 0;
+    int gameOver = 0;
     
     //AUXILIAR MENU
     Menu menu;
@@ -86,7 +87,9 @@ int main() {
     while(!WindowShouldClose()) { 
         
         UpdateMusicStream(musica);
-
+        
+        int tamBarra = 240 - 80*deathCount;
+        
         int gravouScore = 0;//garante que nao vai gravar o score varias vezes no loop
         while (fase.faseAtual > 5 && !IsKeyDown(KEY_ESCAPE)) {
             
@@ -156,13 +159,11 @@ int main() {
                    // DrawTextEx(fonteDS, "NIVAN NAO IRA ... NAO IRA NOS SALVAR", (Vector2) {width / 2 - MeasureText("NIVAN NAO IRA ... NAO IRA NOS SALVAR", 70)/ 2 + 25, height / 2 - 70}, 70, 3, MAROON);
 
                 DrawText("Aperte [SPACE] para continuar", width/2 - MeasureText("Aperte [SPACE] para continuar", 50)/2, 980, 50, GRAY);
-                
                 EndDrawing();
                 
                 if (IsKeyPressed(KEY_SPACE)) {
                     StopSound(youDied);
                     perdeu = 0;
-                    
                     //Reiniciar a fase
                     reiniciarFase(&jogador, &fase);
                     PlayMusicStream(musica);
@@ -184,8 +185,6 @@ int main() {
             //atualiza a camera
             camera.target = jogador.centro;
             
-            int tamBarra = 240 - 80*deathCount;
-            
             while (entrouNaPorta) {
                 
                 if (musicaTocando) {
@@ -197,7 +196,7 @@ int main() {
                 ClearBackground(WHITE);
                 DrawText(TextFormat("HIGHSCORE : %d", jogador.score), width / 2 - MeasureText("HIGHSCORE : ", 75) / 2, height / 2 - 75, 75, BLACK);
                 EndDrawing();
-                if (IsKeyPressed(KEY_SPACE)) {//MUDAR PRA KEY_SPACE DPS
+                if (IsKeyPressed(KEY_SPACE)) {
  
                     //qtdInimigos++;
                     reiniciarFase(&jogador, &fase);
@@ -210,6 +209,22 @@ int main() {
                     //printf("QTD INIMIGOS = %d\n", qtdInimigos);
                 }
             } 
+            
+            //TELA DE GAME OVER
+            if (tamBarra <= 0) gameOver = 1; 
+            while (gameOver) { 
+                BeginDrawing();
+                ClearBackground(BLACK);
+                DrawText("VOCE FOI REPROVADO!", width/2 - MeasureText("VOCE FOI REPROVADO!", 120)/2, height/2 - 220, 120, MAROON);
+                DrawText("GAME OVER", width/2 - MeasureText("GAME OVER", 150)/2, height/2 - 80, 150, RED);
+                EndDrawing();
+                if (IsKeyDown(KEY_ESCAPE)) {
+                    gameOver = 0;
+                    deathCount = 0;
+                    // menu.continua = 0;
+                    // comando.continua = 0;
+                }
+            }  
 
             BeginDrawing();
             
@@ -250,16 +265,15 @@ int main() {
                     cor = BLACK;
                     break;
             }
-            
+            //DESENHA O CAMPO DE VISAO DO PERSONAGEM
             DrawCircle(jogador.centro.x, jogador.centro.y, jogador.campoVisao, cor);
-            
             
             //MARCADORES DOS LIMITES DA FASE
             DrawLine(0, 0, width, 0, BLACK);
             DrawLine(width, 0, width, height, BLACK);
             DrawLine(width, height, 0, height, BLACK);
             DrawLine(0, height, 0, 0, BLACK);
-          
+            
             //DESENHA INIMIGOS
             if (!perdeu) {
                 //for (int i = 0; i < fase.qtdInimigos; i++) {
@@ -373,9 +387,6 @@ int main() {
                     jogador.hitbox = (Rectangle) {0, 0, 0, 0};
                     perdeu = 1;
                     deathCount++;
-                    // if (tamBarra == 0) {
-                        // gameOver();
-                    // }
                 }
             //}
            
@@ -436,8 +447,9 @@ int main() {
             }
 
             //DESENHAR BARRA DE SANIDADE (A CADA MORTE ELA AUMENTA 1/3)
-            DrawRectangle(camera.target.x - 120, camera.target.y - 450, 250, 40, GRAY);
-            DrawRectangle(camera.target.x - 115, camera.target.y - 446, tamBarra, 32, RED);
+            DrawText("SANIDADE", camera.target.x - MeasureText("SANIDADE", 35)/2, camera.target.y - 500, 35, GRAY);
+            DrawRectangle(camera.target.x - 125, camera.target.y - 450, 250, 40, GRAY);
+            DrawRectangle(camera.target.x - 120, camera.target.y - 446, tamBarra, 32, RED);
             //
 
 
