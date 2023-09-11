@@ -29,7 +29,7 @@ Menu desenhaMenu(Menu menu){
        
     ClearBackground(BLACK); //limpa o plano de fundo
     DrawTexture(menu.BG, 0, 0, WHITE); //desenha o plano de fundo do menu (WHITE por que tira o PNG)
-    DrawText("FIVE NIGHTS AT UFPE", 360, 200, 100, WHITE); 
+    DrawText("FIVE NIGHTS AT UFPE", 125, 200, 140, MAROON); 
     DrawText("Iniciar", 750, 825, 120, WHITE); //desenhando textos
     
     //Colocando opcao para digitar o nome do usuario
@@ -277,7 +277,7 @@ Menu desenhaMenu(Menu menu){
             DrawText("DIGITE UM NOME!", menu.w - 1850, menu.h - 260, 50, MAROON);
         }
     }
-    DrawText("Aperte ESC para sair do jogo", 1350, 30, 35, GRAY); //apenas dizendo q se aperta esc, por padrao sai do jogo
+    DrawText("Aperte [ESC] para sair do jogo", 1350, 30, 35, GRAY); //apenas dizendo q se aperta esc, por padrao sai do jogo
        
     EndDrawing(); //fechando o desenho
     
@@ -306,7 +306,7 @@ Comando iniciaJogo(Comando comando){
             DrawText("APERTE ESPAÇO PARA CONTINUAR", 295, 850, 75, GRAY); //desenha as teclas e o que elas fazem
             
             DrawText("Você deve procurar", 1200, 200, 40, GRAY);
-            DrawText("pela chave do GRAD05 na", 1200, 250, 40, GRAY);
+            DrawText("pela chave do GRAD 05 na", 1200, 250, 40, GRAY);
             DrawText("escuridão do CIN.", 1200, 300, 40, GRAY);
             DrawText("Baterias ajudam sua lanterna.", 1200, 375, 40, GRAY);
             DrawText("Cuidado com Paulo!", 1200, 450, 40, GRAY);
@@ -350,6 +350,13 @@ Ranking* organizaRanking(FILE *arq){
                 troca = ranking[i];
                 ranking[i] = ranking[j];
                 ranking[j] = troca;
+            }
+            else if (ranking[i].pontuacao == ranking[j].pontuacao) {
+                if (strcmp(ranking[i].nome, ranking[j].nome) > 0) {
+                    troca = ranking[i];
+                    ranking[i] = ranking[j];
+                    ranking[j] = troca;
+                }
             }
         }
     }
