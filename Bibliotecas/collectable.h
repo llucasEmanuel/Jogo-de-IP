@@ -17,4 +17,6 @@ typedef struct {
 Collectable inicializarChave();
 Collectable *inicializarBaterias(int *qtdBaterias);
 Collectable inicializarPorta();
+Collectable inicializarVida();
 void InicializaColetavelContador(CollectableContador *mini);
+void InicializaColetavelContador1(CollectableContador *mini1);
