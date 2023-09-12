@@ -35,6 +35,7 @@ Menu desenhaMenu(Menu menu){
     //Colocando opcao para digitar o nome do usuario
     DrawText(TextFormat("Digite seu nome: %s", menu.nome), menu.w - 1830, menu.h - 200, 35, WHITE);
     DrawText("_", menu.w - 1825 + MeasureText("Digite seu nome: ", 35) + MeasureText(menu.nome,35), menu.h - 200, 45, WHITE);
+    DrawText("Créditos", menu.w - MeasureText("Créditos", 50) - 125, menu.h - 200, 50, WHITE);
     
     //pegando nome do usuario
     if (IsKeyPressed(KEY_Q) && strlen(menu.nome) < 12){
@@ -276,6 +277,9 @@ Menu desenhaMenu(Menu menu){
         else if(IsMouseButtonDown(MOUSE_LEFT_BUTTON) && strlen(menu.nome) == 0){
             DrawText("DIGITE UM NOME!", menu.w - 1850, menu.h - 260, 50, MAROON);
         }
+    }
+    if(menu.mouse.x >= menu.w - MeasureText("Créditos", 50) - 125 && menu.mouse.x <= menu.w - 125 && menu.mouse.y >= menu.h - 200 && menu.mouse.y <= menu.h - 170){
+        DrawText("Créditos", menu.w - MeasureText("Créditos", 50) - 125, menu.h - 200, 50, MAROON);
     }
     DrawText("Aperte [ESC] para sair do jogo", 1350, 30, 35, GRAY); //apenas dizendo q se aperta esc, por padrao sai do jogo
        
