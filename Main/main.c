@@ -14,6 +14,7 @@ typedef struct {
     Collectable chave;
     Collectable porta;
     Collectable *baterias;
+    Collectable vida;
     int qtdBaterias;
     int qtdInimigos;
     int faseAtual;
@@ -154,7 +155,7 @@ int main() {
                 BeginDrawing();
                 ClearBackground(BLACK);
           
-                DrawTextEx(fonteDS, "PAULO SALGADO NAO IRA ... NAO IRA NOS SALVAR", (Vector2) {width / 2 - MeasureText("PAULO SALGADO NAO IRA ... NAO IRA NOS SALVAR", 70)/ 2 + 25, height / 2 - 70}, 70, 3, MAROON);
+                DrawTextEx(fonteDS, "VOCE CHEGOU 2 MINUTOS ATRASADO!", (Vector2) {width / 2 - MeasureText("VOCE CHEGOU 2 MINUTOS ATRASADO!", 70)/ 2 + 25, height / 2 - 70}, 70, 3, MAROON);
                 //else if (fase.faseAtual == 2)
                    // DrawTextEx(fonteDS, "NIVAN NAO IRA ... NAO IRA NOS SALVAR", (Vector2) {width / 2 - MeasureText("NIVAN NAO IRA ... NAO IRA NOS SALVAR", 70)/ 2 + 25, height / 2 - 70}, 70, 3, MAROON);
 
@@ -243,7 +244,7 @@ int main() {
             //DrawTextureEx(mapa, (Vector2) {0, 0}, 0, 1, WHITE);
             
             //DEFINE A COR BASE DE CADA FASE
-            Color cores[5] = {WHITE, RED, SKYBLUE, ORANGE, GRAY};
+            Color cores[5] = {WHITE, MAROON, SKYBLUE, ORANGE, GRAY};
             Color cor;
             switch (fase.faseAtual) {
                 case 1:
@@ -297,7 +298,7 @@ int main() {
                                 musicaTocando = 0;
                             }
                         }
-                        DrawTextureEx(fase.inimigos[0].textura, fase.inimigos[0].coordenadas, 0, 8, WHITE);
+                        DrawTextureEx(fase.inimigos[0].textura, fase.inimigos[0].coordenadas, 0, 8, BLACK);
                     }
                     
                     DrawRectangle(fase.inimigos[0].hitbox.x, fase.inimigos[0].hitbox.y, fase.inimigos[0].hitbox.width, fase.inimigos[0].hitbox.height, BLANK);
@@ -318,6 +319,7 @@ int main() {
                 }
             }
             
+      
             //hitbox dinamica que se move conforme o sprite do jogador
             jogador.hitbox = (Rectangle) {
                 jogador.coordenadas.x + 18,
@@ -359,7 +361,19 @@ int main() {
                 
                 DrawRectangle(fase.chave.hitbox.x, fase.chave.hitbox.y, fase.chave.hitbox.width, fase.chave.hitbox.height, BLANK);
             }
+            
+            //DESENHA A TEXTURA DA VIDA
+            float distCampoVisaoVidaC = sqrt(pow((2*jogador.coordenadas.x + 0.33*jogador.textura.width)/2 - (2*fase.vida.coordenadas.x + 5*fase.vida.textura.width)/2, 2)
+            + pow((2*jogador.coordenadas.y + 0.33*jogador.textura.height)/2 - (2*fase.vida.coordenadas.y + 5*fase.vida.textura.height)/2, 2));
+            if (fase.vida.colisao == 0) {
+                if (distCampoVisaoVidaC < jogador.campoVisao) {
+                    DrawTextureEx(fase.vida.textura, fase.vida.coordenadas, 0, 5, WHITE);
+                }
+                else DrawTextureEx(fase.vida.textura, fase.vida.coordenadas, 0, 5, BLACK);
                 
+                DrawRectangle(fase.vida.hitbox.x, fase.vida.hitbox.y, fase.vida.hitbox.width, fase.vida.hitbox.height, BLANK);
+            }
+          
             //DESENHA A TEXTURA DO JOGADOR
             if (!perdeu) {
                 DrawTextureEx(jogador.textura, jogador.coordenadas, 0, 0.33, WHITE);
@@ -445,14 +459,24 @@ int main() {
                     jogador.score += 50;
                 }
             }
+            
+            //CHECA SE HOUVE COLISAO COM A VIDA
+            if (CheckCollisionRecs(jogador.hitbox, fase.vida.hitbox)) {
+                DrawTextureEx(fase.vida.textura, fase.vida.coordenadas, 0, 5, cor);
+                fase.vida.colisao = 1;
+                jogador.pegouVida = 1;
+                printf("Colisao VIDA\n");
+                UnloadTexture(fase.vida.textura);
+                fase.vida.hitbox = (Rectangle) {0, 0, 0, 0};
+                jogador.score += 100;
+                if (deathCount != 0) deathCount--;//aumenta a barra de sanidade 
+            }
 
             //DESENHAR BARRA DE SANIDADE (A CADA MORTE ELA AUMENTA 1/3)
             DrawText("SANIDADE", camera.target.x - MeasureText("SANIDADE", 35)/2, camera.target.y - 500, 35, GRAY);
             DrawRectangle(camera.target.x - 125, camera.target.y - 450, 250, 40, GRAY);
             DrawRectangle(camera.target.x - 120, camera.target.y - 446, tamBarra, 32, RED);
             //
-
-
             
             DrawText(TextFormat("NOITE %d", fase.faseAtual), camera.target.x - MeasureText("NOITE 1", 40) / 2, camera.target.y + 400, 40, GRAY);
             DrawText(TextFormat("SCORE : %d", jogador.score), camera.target.x - 900, camera.target.y - 500, 40, GRAY);
@@ -481,6 +505,7 @@ int main() {
     UnloadTexture(fase.porta.textura);
     UnloadTexture(chave.textura);
     UnloadTexture(bateria.textura);
+    UnloadTexture(fase.vida.textura);
     //UnloadTexture(mapa);
     for (int i = 0; i < qtdInimigos; i++) {
        UnloadTexture(fase.inimigos[i].textura); 
@@ -502,6 +527,7 @@ Fase criarFase(int numFase) {//usa o endereco do jogador para poder alterar a po
 
     Fase fase;
     
+    //INICIALIZAR INIMIGOS
     fase.inimigos = inicializarInimigos();
  
     //INICIALIZACAO DAS BATERIAS
@@ -513,6 +539,12 @@ Fase criarFase(int numFase) {//usa o endereco do jogador para poder alterar a po
     
     //INICIALIZACAO DA PORTA DE SAIDA
     fase.porta = inicializarPorta();
+    
+    int spawnVida = rand() % 2;//50% de chance de spawnar e 50% de nao spawnar
+    if (spawnVida) {
+        fase.vida = inicializarVida();
+    }
+    
     fase.faseAtual = numFase;
     
     return fase;
