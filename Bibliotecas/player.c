@@ -82,6 +82,7 @@ Player inicializarJogador() {
     Player jogador;
     jogador.qtdBaterias = 0;
     jogador.temChave = 0;//flag
+    jogador.pegouVida = 0;
     jogador.textura = LoadTexture("Sprites e Texturas/sprite1.png");
     jogador.coordenadas = (Vector2) {width/2, height/2};
     jogador.score = 0;
