@@ -71,6 +71,23 @@ Collectable inicializarPorta() {
     return porta;
 }
 
+Collectable inicializarVida() {
+    
+    int height = GetScreenHeight();
+    int width = GetScreenWidth();
+    Collectable vida;
+    vida.textura = LoadTexture("Sprites e Texturas/lifeHeart.png");
+    vida.coordenadas = (Vector2) {(float) (rand() % (width - (vida.textura.width * 2))), (float) (rand() % (height - (vida.textura.height * 2)))};
+    vida.hitbox = (Rectangle) {
+        vida.coordenadas.x + 10,
+        vida.coordenadas.y,
+        45,
+        55,
+    };
+    vida.colisao = 0;
+    return vida;
+}
+
 void InicializaColetavelContador(CollectableContador *mini){
     
     (*mini).textura = LoadTexture("Sprites e Texturas/spriteChave2.png");
