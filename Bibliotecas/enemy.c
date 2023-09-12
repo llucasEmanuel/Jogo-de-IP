@@ -15,7 +15,7 @@ Enemy *inicializarInimigos() {
         exit(1);
     }
     Enemy *inimigos = ptrAux;
-    inimigos[0].textura = LoadTexture("Sprites e Texturas/saltyPaul.png");
+    inimigos[0].textura = LoadTexture("Sprites e Texturas/theOneFromMars.png");
     inimigos[0].coordenadas = (Vector2) {(float) (rand() % (width - (inimigos[0].textura.width * 8))), (float) (rand() % (height - (inimigos[0].textura.height * 8)))};
     inimigos[0].centro = (Vector2) {(2*inimigos[0].coordenadas.x + 8*inimigos[0].textura.width)/2, (2*inimigos[0].coordenadas.y + 8*inimigos[0].textura.height)/2};
     inimigos[0].detectouJogador = 0;
@@ -83,7 +83,6 @@ void moveInimigoCirculos(Enemy *inimigo, int qtdInimigos) {//cria um padrao de m
 } 
 
 void perseguirJogador(Enemy *inimigos, Player jogador, int qtdInimigos) {//inimigo tbm anda na diagonal
-
 
     //for (int i = 0 ; i < qtdInimigos; i++) {
         float deltaX = jogador.centro.x - inimigos[0].centro.x;//variacao em x
