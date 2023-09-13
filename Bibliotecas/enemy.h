@@ -4,7 +4,7 @@
 #include "player.h"
 
 typedef struct {
-    Texture textura;
+    Texture textura[4];//sprites do inimigo
     Vector2 coordenadas;
     Rectangle hitbox;
     Vector2 centro;
@@ -12,6 +12,6 @@ typedef struct {
 } Enemy;
 
 Enemy *inicializarInimigos();
-Enemy *atualizarVetorInimigos(Enemy *inimigos, int *qtdInimigos);
+//Enemy *atualizarVetorInimigos(Enemy *inimigos, int *qtdInimigos);
 void moveInimigoCirculos(Enemy *inimigo, int qtdInimigos);
 void perseguirJogador(Enemy *inimigo, Player jogador, int qtdInimigos);
