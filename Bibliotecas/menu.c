@@ -22,7 +22,9 @@ void iniciaComando(Comando *comando){ //funcao que inicializa a struct comando
 
 Menu desenhaMenu(Menu menu){
     
-        
+    int flag = 0;
+    int apertou = 0;
+    
     menu.mouse = GetMousePosition(); //essa funcao devolve as coordenadas do mouse (X, Y)
         
     BeginDrawing(); //comeca a desenhar
@@ -280,6 +282,28 @@ Menu desenhaMenu(Menu menu){
     }
     if(menu.mouse.x >= menu.w - MeasureText("Créditos", 50) - 125 && menu.mouse.x <= menu.w - 125 && menu.mouse.y >= menu.h - 200 && menu.mouse.y <= menu.h - 170){
         DrawText("Créditos", menu.w - MeasureText("Créditos", 50) - 125, menu.h - 200, 50, MAROON);
+        
+        if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
+            flag = 1;
+        }
+    }
+    while(flag == 1){
+        BeginDrawing();
+        ClearBackground(BLACK);
+        DrawText("MARCELO ARCOVERDE NEVES", 100, 100, 60, WHITE);
+        DrawText("LUCAS EMANUEL ANSD", 100, 200, 60, WHITE);
+        DrawText("Aperte [SPACE] para voltar para o menu", (menu.w / 2) - (MeasureText("Aperte [SPACE] para voltar para o menu", 50) / 2), menu.h - 100, 50, GRAY);
+        
+        
+        if(IsKeyDown(KEY_SPACE)){
+            DrawText("Aperte [SPACE] para voltar para o menu", (menu.w / 2) - (MeasureText("Aperte [SPACE] para voltar para o menu", 50) / 2), menu.h - 100, 50, MAROON);
+            apertou = 1;
+            
+        }
+        if(IsKeyReleased(KEY_SPACE) && apertou == 1){
+                flag = 0;
+        }
+        EndDrawing();
     }
     DrawText("Aperte [ESC] para sair do jogo", 1350, 30, 35, GRAY); //apenas dizendo q se aperta esc, por padrao sai do jogo
        
@@ -288,6 +312,7 @@ Menu desenhaMenu(Menu menu){
   
     return menu;
 }
+
 
 Comando iniciaJogo(Comando comando){
     int flag = 0;
