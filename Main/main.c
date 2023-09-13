@@ -9,6 +9,8 @@
 #include "collectable.h"
 #include "enemy.h"
 
+#define SILVER (Color) {192, 192, 192, 255}
+
 typedef struct {
     Enemy *inimigos;
     Collectable chave;
@@ -175,6 +177,8 @@ int main() {
                     perdeu = 0;
                     //Reiniciar a fase
                     reiniciarFase(&jogador, &fase);
+                    if (fase.faseAtual <= 3)    
+                        fase.qtdInimigos = fase.faseAtual;
                     PlayMusicStream(musicaFase1);
                     //fase.inimigos = inicializarInimigos();
                 }
@@ -221,6 +225,8 @@ int main() {
                     //fase.inimigos = inicializarInimigos();
                     entrouNaPorta = 0;    
                     fase.faseAtual++;
+                    if (fase.faseAtual <= 3)    
+                        fase.qtdInimigos = fase.faseAtual;
                     //fase.inimigos = atualizarVetorInimigos(fase.inimigos, &qtdInimigos);
                     //fase.qtdInimigos = qtdInimigos;
                     //printf("QTD INIMIGOS = %d\n", qtdInimigos);
@@ -250,9 +256,9 @@ int main() {
             //atualiza o centro do jogador
             jogador.centro = (Vector2) {(2*jogador.coordenadas.x + 0.33*jogador.textura.width)/2, (2*jogador.coordenadas.y + 0.33*jogador.textura.height)/2};
             //atualiza o centro do inimigo
-            //for (int i = 0; i < fase.qtdInimigos; i++) {
-                fase.inimigos[0].centro = (Vector2) {(2*fase.inimigos[0].coordenadas.x + 8*fase.inimigos[0].textura[0].width)/2, (2*fase.inimigos[0].coordenadas.y + 8*fase.inimigos[0].textura[0].height)/2};
-            //}
+            for (int i = 0; i < fase.qtdInimigos; i++) {
+                fase.inimigos[i].centro = (Vector2) {(2*fase.inimigos[i].coordenadas.x + 8*fase.inimigos[i].textura[0].width)/2, (2*fase.inimigos[i].coordenadas.y + 8*fase.inimigos[i].textura[0].height)/2};
+            }
             ClearBackground(BLACK);
             
             
@@ -291,18 +297,33 @@ int main() {
             DrawLine(width, height, 0, height, BLACK);
             DrawLine(0, height, 0, 0, BLACK);
             
+            //DESENHA DE TEXTURA DA PORTA
+            float distCampoVisaoPortaC = sqrt(pow((2*jogador.coordenadas.x + 0.33*jogador.textura.width)/2 - (2*fase.porta.coordenadas.x + 2.2*fase.porta.textura.width)/2, 2)
+            + pow((2*jogador.coordenadas.y + 0.33*jogador.textura.height)/2 - (2*fase.porta.coordenadas.y + 2.2*fase.porta.textura.height)/2, 2));
+            if (!jogador.temChave) {//desenha antes se o jogador nao tiver a chave
+                if (distCampoVisaoPortaC < jogador.campoVisao) {
+                    DrawTextureEx(fase.porta.textura, fase.porta.coordenadas, 0, 2.2, WHITE);
+                }
+                else DrawTextureEx(fase.porta.textura, fase.porta.coordenadas, 0, 2.2,  WHITE);
+                
+                DrawRectangle(fase.porta.hitbox.x, fase.porta.hitbox.y, fase.porta.hitbox.width, fase.porta.hitbox.height, BLANK);
+            }
+            
             //DESENHA INIMIGOS
             if (!perdeu) {
-                //for (int i = 0; i < fase.qtdInimigos; i++) {
+                for (int i = 0; i < fase.qtdInimigos; i++) {
+                    
                     float deltaT = GetFrameTime();
                     acumulador += deltaT;
                     
                     if (acumulador >= tempoFrame) {
-                        frameAtual = ((frameAtual + 1) % 4);
+                        if (i == 0)
+                            frameAtual = ((frameAtual + 1) % 4);
+                        else frameAtual = ((frameAtual + 1) % 1);
                         acumulador -= tempoFrame;
                     }
                     
-                    float distCampoVisaoinimigoC = sqrt(pow(jogador.centro.x - fase.inimigos[0].centro.x, 2) + pow(jogador.centro.y - fase.inimigos[0].centro.y, 2));
+                    float distCampoVisaoinimigoC = sqrt(pow(jogador.centro.x - fase.inimigos[i].centro.x, 2) + pow(jogador.centro.y - fase.inimigos[i].centro.y, 2));
                     if (distCampoVisaoinimigoC < jogador.campoVisao) {//se tiver dentro do campo de visao
                         if (!musicaTocando) {
                             PauseMusicStream(musicaFase1);
@@ -311,7 +332,7 @@ int main() {
                             musicaTocando = 1;
                             musicaDelay = 300;//num de frames (5 segundos)
                         }
-                        DrawTextureEx(fase.inimigos[0].textura[frameAtual], fase.inimigos[0].coordenadas, 0, 8, WHITE);
+                        DrawTextureEx(fase.inimigos[i].textura[frameAtual], fase.inimigos[i].coordenadas, 0, 8, WHITE);
                     }
                     else { 
                         if (musicaTocando) {
@@ -324,11 +345,11 @@ int main() {
                                 musicaTocando = 0;
                             }
                         }
-                        DrawTextureEx(fase.inimigos[0].textura[frameAtual], fase.inimigos[0].coordenadas, 0, 8, WHITE);
+                        DrawTextureEx(fase.inimigos[i].textura[frameAtual], fase.inimigos[i].coordenadas, 0, 8, WHITE);
                     }
                     
-                    DrawRectangle(fase.inimigos[0].hitbox.x, fase.inimigos[0].hitbox.y, fase.inimigos[0].hitbox.width, fase.inimigos[0].hitbox.height, BLANK);
-                //}
+                    DrawRectangle(fase.inimigos[i].hitbox.x, fase.inimigos[i].hitbox.y, fase.inimigos[i].hitbox.width, fase.inimigos[i].hitbox.height, BLANK);
+                }
             }
            
             //DESENHA A TEXTURA DAS BATERIAS 
@@ -354,25 +375,13 @@ int main() {
             };
           
             //hitbox dinamica para o inimigo
-            //for (int i = 0; i < fase.qtdInimigos; i++) {
-                fase.inimigos[0].hitbox = (Rectangle) {
-                    fase.inimigos[0].coordenadas.x + 5,
-                    fase.inimigos[0].coordenadas.y,
+            for (int i = 0; i < fase.qtdInimigos; i++) {
+                fase.inimigos[i].hitbox = (Rectangle) {
+                    fase.inimigos[i].coordenadas.x + 5,
+                    fase.inimigos[i].coordenadas.y,
                     108,
                     165,
                 };
-            //}
-            
-            //DESENHA DE TEXTURA DA PORTA
-            float distCampoVisaoPortaC = sqrt(pow((2*jogador.coordenadas.x + 0.33*jogador.textura.width)/2 - (2*fase.porta.coordenadas.x + 2.2*fase.porta.textura.width)/2, 2)
-            + pow((2*jogador.coordenadas.y + 0.33*jogador.textura.height)/2 - (2*fase.porta.coordenadas.y + 2.2*fase.porta.textura.height)/2, 2));
-            if (!jogador.temChave) {//desenha antes se o jogador nao tiver a chave
-                if (distCampoVisaoPortaC < jogador.campoVisao) {
-                    DrawTextureEx(fase.porta.textura, fase.porta.coordenadas, 0, 2.2, WHITE);
-                }
-                else DrawTextureEx(fase.porta.textura, fase.porta.coordenadas, 0, 2.2,  BLACK);
-                
-                DrawRectangle(fase.porta.hitbox.x, fase.porta.hitbox.y, fase.porta.hitbox.width, fase.porta.hitbox.height, BLANK);
             }
             
             //DESENHA TEXTURA DA CHAVE
@@ -382,7 +391,7 @@ int main() {
                 if (distCampoVisaoChaveC < jogador.campoVisao) {
                     DrawTextureEx(fase.chave.textura, fase.chave.coordenadas, 0, 2.5, WHITE);
                 }
-                else DrawTextureEx(fase.chave.textura, fase.chave.coordenadas, 0, 2.5, BLACK);
+                else DrawTextureEx(fase.chave.textura, fase.chave.coordenadas, 0, 2.5, WHITE);
                 
                 DrawRectangle(fase.chave.hitbox.x, fase.chave.hitbox.y, fase.chave.hitbox.width, fase.chave.hitbox.height, BLANK);
             }
@@ -409,7 +418,7 @@ int main() {
                 if (distCampoVisaoPortaC < jogador.campoVisao) {
                     DrawTextureEx(fase.porta.textura, fase.porta.coordenadas, 0, 2.2, WHITE);
                 }
-                else DrawTextureEx(fase.porta.textura, fase.porta.coordenadas, 0, 2.2, BLACK);
+                else DrawTextureEx(fase.porta.textura, fase.porta.coordenadas, 0, 2.2, WHITE);
                 
                 DrawRectangle(fase.porta.hitbox.x, fase.porta.hitbox.y, fase.porta.hitbox.width, fase.porta.hitbox.height, BLANK);
             }
@@ -418,8 +427,8 @@ int main() {
             perseguirJogador(fase.inimigos, jogador, fase.qtdInimigos);
           
             
-            //for (int i = 0; i < fase.qtdInimigos; i++) {
-                if (CheckCollisionRecs(jogador.hitbox, fase.inimigos[0].hitbox)) {
+            for (int i = 0; i < fase.qtdInimigos; i++) {
+                if (CheckCollisionRecs(jogador.hitbox, fase.inimigos[i].hitbox)) {
                     DrawTextureEx(jogador.textura, jogador.coordenadas, 0, 0.33, cor);
                     printf("Colisao INIMIGO\n");
                     UnloadTexture(jogador.textura);
@@ -427,7 +436,7 @@ int main() {
                     perdeu = 1;
                     deathCount++;
                 }
-            //}
+            }
            
             //CHECA SE HOUVE COLISAO COM A CHAVE
             if (CheckCollisionRecs(jogador.hitbox, fase.chave.hitbox)) {
@@ -498,22 +507,22 @@ int main() {
             }
 
             //DESENHAR BARRA DE SANIDADE (A CADA MORTE ELA DIMINUI 1/3)
-            DrawText("SANIDADE", camera.target.x - MeasureText("SANIDADE", 35)/2, camera.target.y - 500, 35, GRAY);
-            DrawRectangle(camera.target.x - 125, camera.target.y - 450, 250, 40, GOLD);
+            DrawText("SANIDADE", camera.target.x - MeasureText("SANIDADE", 35)/2, camera.target.y - 500, 35, SILVER);
+            DrawRectangle(camera.target.x - 125, camera.target.y - 450, 250, 40, SILVER);
             DrawRectangle(camera.target.x - 120, camera.target.y - 446, tamBarra, 32, RED);
             DrawRectangle(camera.target.x - 120 + 240 - (80*deathCount), camera.target.y - 446, 80*deathCount, 32, BLACK);
             //
             
-            DrawText(TextFormat("NOITE %d", fase.faseAtual), camera.target.x - MeasureText("NOITE 1", 40) / 2, camera.target.y + 400, 40, GRAY);
-            DrawText(TextFormat("SCORE : %d", jogador.score), camera.target.x - 900, camera.target.y - 500, 40, GRAY);
+            DrawText(TextFormat("NOITE %d", fase.faseAtual), camera.target.x - MeasureText("NOITE 1", 40) / 2, camera.target.y + 400, 40, SILVER);
+            DrawText(TextFormat("SCORE : %d", jogador.score), camera.target.x - 900, camera.target.y - 500, 40, SILVER);
             chave.coordenadas.x = camera.target.x - 900;
             chave.coordenadas.y = camera.target.y - 450;
             DrawTextureEx(chave.textura, chave.coordenadas, 0, 2.5, WHITE);
-            DrawText(TextFormat(" x %d", jogador.temChave), camera.target.x - 900 + (2.5 * chave.textura.width), camera.target.y - 450, 40, GRAY);
+            DrawText(TextFormat(" x %d", jogador.temChave), camera.target.x - 900 + (2.5 * chave.textura.width), camera.target.y - 450, 40, SILVER);
             bateria.coordenadas.x = camera.target.x - 900;
             bateria.coordenadas.y = camera.target.y - 400;
             DrawTextureEx(bateria.textura, bateria.coordenadas, 0, 3, WHITE);
-            DrawText(TextFormat(" x %d", jogador.qtdBaterias), camera.target.x - 900 + (3 * bateria.textura.width), camera.target.y - 390, 40, GRAY);
+            DrawText(TextFormat(" x %d", jogador.qtdBaterias), camera.target.x - 900 + (3 * bateria.textura.width), camera.target.y - 390, 40, SILVER);
 
             EndMode2D();
             EndDrawing();  
@@ -534,7 +543,7 @@ int main() {
     UnloadTexture(bateria.textura);
     UnloadTexture(fase.vida.textura);
     //UnloadTexture(mapa);
-    for (int i = 0; i < qtdInimigos; i++) {
+    for (int i = 0; i < fase.qtdInimigos; i++) {
         for (int j = 0; j < 4; j++)
             UnloadTexture(fase.inimigos[i].textura[j]); 
     }
@@ -557,7 +566,9 @@ Fase criarFase(int numFase) {//usa o endereco do jogador para poder alterar a po
     Fase fase;
     
     //INICIALIZAR INIMIGOS
-    fase.inimigos = inicializarInimigos();
+    fase.inimigos = inicializarInimigos(numFase);
+    if (numFase <= 3) fase.qtdInimigos = numFase;
+    else fase.qtdInimigos = 3;
  
     //INICIALIZACAO DAS BATERIAS
     fase.qtdBaterias = 0;
