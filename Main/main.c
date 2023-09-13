@@ -42,9 +42,13 @@ int main() {
     //Texture mapa = LoadTexture("Sprites e Texturas/mapa.png");
     fase.qtdInimigos = qtdInimigos;
     
-    //INICIALIZACAO DOS SONS
+    //INICIALIZACAO DOS SONS E MUSICAS
     InitAudioDevice();
     Music musica = LoadMusicStream("Sons e Musica/Spooked - Mini Vandals.mp3");
+    //Music musicasFase[5];
+    //musicasFase[0] = LoadMusicStream("Sons e Musica/musicaFase1.mp3");
+    
+    Music musicaFase1 = LoadMusicStream("Sons e Musica/musicaFase1.mp3");
     Sound youDied = LoadSound("Sons e Musica/you_died_DS.mp3");
     Sound musicaEncerramento = LoadSound("Sons e Musica/Dramatic Series Theme - Freedom Trail Studio.mp3");
     Sound musicaPerseguicao = LoadSound("Sons e Musica/Funeral in Sinaloa - Jimena Contreras.mp3");
@@ -61,6 +65,7 @@ int main() {
     int perdeu = 0;
     int deathCount = 0;
     int gameOver = 0;
+    int musicaFaseTocando = 0;
     
     //AUXILIAR MENU
     Menu menu;
@@ -83,6 +88,9 @@ int main() {
     InicializaColetavelContador(&chave);
     InicializaColetavelContador1(&bateria);
 
+    int frameAtual = 0;
+    float tempoFrame = 0.1;
+    float acumulador = 0;
 
     //INICIO DO LOOP EM QUE RODA O JOGO
     while(!WindowShouldClose()) { 
@@ -103,7 +111,7 @@ int main() {
            
             //SALVAR A PONTUACAO DO JOGADOR
             if (!gravouScore) {
-                StopMusicStream(musica);
+                StopMusicStream(musicaFase1);
                 if (musicaTocando) {
                     StopSound(musicaPerseguicao);
                     musicaTocando = 0;
@@ -138,7 +146,7 @@ int main() {
         
 
         if (perdeu) {  
-            StopMusicStream(musica);
+            StopMusicStream(musicaFase1);
             SetSoundVolume(youDied, 2.5);
             PlaySound(youDied);
             
@@ -167,7 +175,7 @@ int main() {
                     perdeu = 0;
                     //Reiniciar a fase
                     reiniciarFase(&jogador, &fase);
-                    PlayMusicStream(musica);
+                    PlayMusicStream(musicaFase1);
                     //fase.inimigos = inicializarInimigos();
                 }
             }
@@ -185,6 +193,14 @@ int main() {
         
             //atualiza a camera
             camera.target = jogador.centro;
+            if (!musicaFaseTocando) {//CRIAR UM VETOR E TOCAR A MUSICA DE (IND_FASE + 1)
+                StopMusicStream(musica);
+                PlayMusicStream(musicaFase1);
+                musicaFaseTocando = 1;
+                musicaTocando = 0;
+            }
+            
+            UpdateMusicStream(musicaFase1);
             
             while (entrouNaPorta) {
                 
@@ -201,7 +217,7 @@ int main() {
  
                     //qtdInimigos++;
                     reiniciarFase(&jogador, &fase);
-                    PlayMusicStream(musica);
+                    PlayMusicStream(musicaFase1);
                     //fase.inimigos = inicializarInimigos();
                     entrouNaPorta = 0;    
                     fase.faseAtual++;
@@ -235,7 +251,7 @@ int main() {
             jogador.centro = (Vector2) {(2*jogador.coordenadas.x + 0.33*jogador.textura.width)/2, (2*jogador.coordenadas.y + 0.33*jogador.textura.height)/2};
             //atualiza o centro do inimigo
             //for (int i = 0; i < fase.qtdInimigos; i++) {
-                fase.inimigos[0].centro = (Vector2) {(2*fase.inimigos[0].coordenadas.x + 8*fase.inimigos[0].textura.width)/2, (2*fase.inimigos[0].coordenadas.y + 8*fase.inimigos[0].textura.height)/2};
+                fase.inimigos[0].centro = (Vector2) {(2*fase.inimigos[0].coordenadas.x + 8*fase.inimigos[0].textura[0].width)/2, (2*fase.inimigos[0].coordenadas.y + 8*fase.inimigos[0].textura[0].height)/2};
             //}
             ClearBackground(BLACK);
             
@@ -278,27 +294,37 @@ int main() {
             //DESENHA INIMIGOS
             if (!perdeu) {
                 //for (int i = 0; i < fase.qtdInimigos; i++) {
+                    float deltaT = GetFrameTime();
+                    acumulador += deltaT;
+                    
+                    if (acumulador >= tempoFrame) {
+                        frameAtual = ((frameAtual + 1) % 4);
+                        acumulador -= tempoFrame;
+                    }
+                    
                     float distCampoVisaoinimigoC = sqrt(pow(jogador.centro.x - fase.inimigos[0].centro.x, 2) + pow(jogador.centro.y - fase.inimigos[0].centro.y, 2));
                     if (distCampoVisaoinimigoC < jogador.campoVisao) {//se tiver dentro do campo de visao
                         if (!musicaTocando) {
-                            PauseMusicStream(musica);
+                            PauseMusicStream(musicaFase1);
                             PlaySound(musicaPerseguicao);
                             SetSoundVolume(musicaPerseguicao, 0.6);
                             musicaTocando = 1;
                             musicaDelay = 300;//num de frames (5 segundos)
                         }
-                        DrawTextureEx(fase.inimigos[0].textura, fase.inimigos[0].coordenadas, 0, 8, WHITE);
+                        DrawTextureEx(fase.inimigos[0].textura[frameAtual], fase.inimigos[0].coordenadas, 0, 8, WHITE);
                     }
                     else { 
                         if (musicaTocando) {
-                            if (musicaDelay > 0) musicaDelay--;
+                            if (musicaDelay > 0) {
+                                musicaDelay--;
+                            }
                             else {   
-                                ResumeMusicStream(musica);//continua de onde parou
+                                ResumeMusicStream(musicaFase1);//continua de onde parou
                                 StopSound(musicaPerseguicao);
                                 musicaTocando = 0;
                             }
                         }
-                        DrawTextureEx(fase.inimigos[0].textura, fase.inimigos[0].coordenadas, 0, 8, BLACK);
+                        DrawTextureEx(fase.inimigos[0].textura[frameAtual], fase.inimigos[0].coordenadas, 0, 8, WHITE);
                     }
                     
                     DrawRectangle(fase.inimigos[0].hitbox.x, fase.inimigos[0].hitbox.y, fase.inimigos[0].hitbox.width, fase.inimigos[0].hitbox.height, BLANK);
@@ -319,7 +345,6 @@ int main() {
                 }
             }
             
-      
             //hitbox dinamica que se move conforme o sprite do jogador
             jogador.hitbox = (Rectangle) {
                 jogador.coordenadas.x + 18,
@@ -472,10 +497,11 @@ int main() {
                 if (deathCount != 0) deathCount--;//aumenta a barra de sanidade 
             }
 
-            //DESENHAR BARRA DE SANIDADE (A CADA MORTE ELA AUMENTA 1/3)
+            //DESENHAR BARRA DE SANIDADE (A CADA MORTE ELA DIMINUI 1/3)
             DrawText("SANIDADE", camera.target.x - MeasureText("SANIDADE", 35)/2, camera.target.y - 500, 35, GRAY);
-            DrawRectangle(camera.target.x - 125, camera.target.y - 450, 250, 40, GRAY);
+            DrawRectangle(camera.target.x - 125, camera.target.y - 450, 250, 40, GOLD);
             DrawRectangle(camera.target.x - 120, camera.target.y - 446, tamBarra, 32, RED);
+            DrawRectangle(camera.target.x - 120 + 240 - (80*deathCount), camera.target.y - 446, 80*deathCount, 32, BLACK);
             //
             
             DrawText(TextFormat("NOITE %d", fase.faseAtual), camera.target.x - MeasureText("NOITE 1", 40) / 2, camera.target.y + 400, 40, GRAY);
@@ -494,12 +520,13 @@ int main() {
         }
     }
 
-    //DESALOCA OS PONTEIROS, APAGA AS TEXTURAS E DESATIVA AS FUNCOES DE AUDIO
+    //DA UNLOAD NAS MUSICAS E SONS
     UnloadMusicStream(musica);
     UnloadSound(musicaEncerramento);
     UnloadSound(musicaPerseguicao);
     UnloadSound(youDied);
     
+    //DA UNLOAD NAS TEXTURAS
     UnloadTexture(jogador.textura);
     UnloadTexture(fase.chave.textura);
     UnloadTexture(fase.porta.textura);
@@ -508,13 +535,16 @@ int main() {
     UnloadTexture(fase.vida.textura);
     //UnloadTexture(mapa);
     for (int i = 0; i < qtdInimigos; i++) {
-       UnloadTexture(fase.inimigos[i].textura); 
+        for (int j = 0; j < 4; j++)
+            UnloadTexture(fase.inimigos[i].textura[j]); 
     }
     for (int i = 0; i < fase.qtdBaterias; i++) {
        UnloadTexture(fase.baterias[i].textura); 
     }
-    free(fase.inimigos);
     UnloadFont(fonteDS);
+    
+    //DESALOCA OS PONTEIROS
+    free(fase.inimigos);
     free(fase.baterias);
     CloseAudioDevice();
     CloseWindow();
@@ -524,7 +554,6 @@ int main() {
 
 Fase criarFase(int numFase) {//usa o endereco do jogador para poder alterar a posicao e outros fatores
     
-
     Fase fase;
     
     //INICIALIZAR INIMIGOS
