@@ -15,9 +15,15 @@ Enemy *inicializarInimigos() {
         exit(1);
     }
     Enemy *inimigos = ptrAux;
-    inimigos[0].textura = LoadTexture("Sprites e Texturas/theOneFromMars.png");
-    inimigos[0].coordenadas = (Vector2) {(float) (rand() % (width - (inimigos[0].textura.width * 8))), (float) (rand() % (height - (inimigos[0].textura.height * 8)))};
-    inimigos[0].centro = (Vector2) {(2*inimigos[0].coordenadas.x + 8*inimigos[0].textura.width)/2, (2*inimigos[0].coordenadas.y + 8*inimigos[0].textura.height)/2};
+    //CARREGAR OS SPRITES
+    for (int i = 0; i < 4; i++) {
+        char file[20];
+        sprintf(file, "Sprites e Texturas/mars/marsS%d.png", i+1);
+        inimigos[0].textura[i] = LoadTexture(file);
+    }
+    //inimigos[0].textura = LoadTexture("Sprites e Texturas/theOneFromMars.png");
+    inimigos[0].coordenadas = (Vector2) {(float) (rand() % (width - (inimigos[0].textura[0].width * 8))), (float) (rand() % (height - (inimigos[0].textura[0].height * 8)))};
+    inimigos[0].centro = (Vector2) {(2*inimigos[0].coordenadas.x + 8*inimigos[0].textura[0].width)/2, (2*inimigos[0].coordenadas.y + 8*inimigos[0].textura[0].height)/2};
     inimigos[0].detectouJogador = 0;
     return inimigos;
 }
@@ -35,10 +41,10 @@ Enemy *atualizarVetorInimigos(Enemy *inimigos, int *qtdInimigos) {
     (*qtdInimigos)++;
     
     //INICIALIZAR O INIMIGO DE INDICE [(*qtdInimigos) - 1]
-    inimigos[(*qtdInimigos) - 1].textura = LoadTexture("Sprites e Texturas/saltyPaul.png");
-    inimigos[(*qtdInimigos) - 1].coordenadas = (Vector2) {(float) (rand() % (width - (inimigos[(*qtdInimigos) - 1].textura.width * 8))), (float) (rand() % (height - (inimigos[(*qtdInimigos) - 1].textura.height * 8)))};
-    inimigos[(*qtdInimigos) - 1].centro = (Vector2) {(2*inimigos[(*qtdInimigos) - 1].coordenadas.x + 8*inimigos[0].textura.width)/2, (2*inimigos[(*qtdInimigos) - 1].coordenadas.y + 8*inimigos[(*qtdInimigos) - 1].textura.height)/2};
-    inimigos[(*qtdInimigos) - 1].detectouJogador = 0;
+    // inimigos[(*qtdInimigos) - 1].textura = LoadTexture("Sprites e Texturas/saltyPaul.png");
+    // inimigos[(*qtdInimigos) - 1].coordenadas = (Vector2) {(float) (rand() % (width - (inimigos[(*qtdInimigos) - 1].textura.width * 8))), (float) (rand() % (height - (inimigos[(*qtdInimigos) - 1].textura.height * 8)))};
+    // inimigos[(*qtdInimigos) - 1].centro = (Vector2) {(2*inimigos[(*qtdInimigos) - 1].coordenadas.x + 8*inimigos[0].textura.width)/2, (2*inimigos[(*qtdInimigos) - 1].coordenadas.y + 8*inimigos[(*qtdInimigos) - 1].textura.height)/2};
+    // inimigos[(*qtdInimigos) - 1].detectouJogador = 0;
     
     return inimigos;
 }
@@ -83,6 +89,7 @@ void moveInimigoCirculos(Enemy *inimigo, int qtdInimigos) {//cria um padrao de m
 } 
 
 void perseguirJogador(Enemy *inimigos, Player jogador, int qtdInimigos) {//inimigo tbm anda na diagonal
+
 
     //for (int i = 0 ; i < qtdInimigos; i++) {
         float deltaX = jogador.centro.x - inimigos[0].centro.x;//variacao em x
