@@ -20,24 +20,27 @@ void iniciaComando(Comando *comando){ //funcao que inicializa a struct comando
         (*comando).d = LoadTexture("./Sprites e Texturas/D.png"); //carregando as texturas dos comandos
         (*comando).continua = 0;
 }
-
+int delay = 300;
 Menu desenhaMenu(Menu menu){
     
     int flag = 0;
     int apertou = 0;
     
     menu.mouse = GetMousePosition(); //essa funcao devolve as coordenadas do mouse (X, Y)
-        
-    BeginDrawing(); //comeca a desenhar
-    ClearBackground(LIGHTGRAY); //limpa o plano de fundo
-    DrawTexture(menu.FNAU, 125, 140, BLANK);
-    WaitTime(05);//o tempo de "exibicao" da logo
-    EndDrawing();
+
+    while (delay > 0) {
+        delay--;
+        BeginDrawing(); //comeca a desenhar
+        ClearBackground(LIGHTGRAY); //limpa o plano de fundo
+        DrawTextureEx(menu.FNAU, (Vector2) {-430, 115}, 0, 1.6, WHITE);
+        //WaitTime(05);//o tempo de "exibicao" da logo
+        EndDrawing();
+    }
     
     BeginDrawing(); //comeca a desenhar   
     ClearBackground(BLACK); //limpa o plano de fundo
     DrawTexture(menu.BG, 0, 0, WHITE); //desenha o plano de fundo do menu (WHITE por que tira o PNG)
-    DrawTexture("FIVE NIGHTS AT UFPE", 125, 200, 140, MAROON); 
+    DrawText("FIVE NIGHTS AT UFPE", 125, 200, 140, MAROON); 
     DrawText("Iniciar", 750, 825, 120, WHITE); //desenhando textos
     
     //Colocando opcao para digitar o nome do usuario
@@ -338,7 +341,7 @@ Comando iniciaJogo(Comando comando){
             DrawText("- ANDAR PARA BAIXO", 240, 460, 50, WHITE);
             DrawTexture(comando.d, 150, 600, WHITE);
             DrawText("- ANDAR PARA DIREITA", 240, 610, 50, WHITE);
-            DrawText("APERTE ESPAÇO PARA CONTINUAR", 295, 850, 75, GRAY); //desenha as teclas e o que elas fazem
+            DrawText("APERTE [SPACE] PARA CONTINUAR", 295, 850, 75, GRAY); //desenha as teclas e o que elas fazem
             
             DrawText("Você deve procurar", 1200, 200, 40, GRAY);
             DrawText("pela chave do GRAD 05 na", 1200, 250, 40, GRAY);
