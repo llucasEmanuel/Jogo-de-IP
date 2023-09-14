@@ -22,8 +22,12 @@ typedef struct {
     int faseAtual;
 } Fase;
 
+void carregarMusicas(Music *musicasFase, Music *musicaMenu);
+void carregarSons(Sound *youDied, Sound *musicaPerseguicao, Sound *musicaEncerramento);
+void salvarScore(char *nome, int score);
 Fase criarFase(int numFase);
 void reiniciarFase(Player *jogador, Fase *fase);
+
 
 int main() {
     
@@ -46,15 +50,16 @@ int main() {
     
     //INICIALIZACAO DOS SONS E MUSICAS
     InitAudioDevice();
-    Music musica = LoadMusicStream("Sons e Musica/Spooked - Mini Vandals.mp3");
-    //Music musicasFase[5];
-    //musicasFase[0] = LoadMusicStream("Sons e Musica/musicaFase1.mp3");
     
-    Music musicaFase1 = LoadMusicStream("Sons e Musica/musicaFase1.mp3");
-    Sound youDied = LoadSound("Sons e Musica/you_died_DS.mp3");
-    Sound musicaEncerramento = LoadSound("Sons e Musica/Dramatic Series Theme - Freedom Trail Studio.mp3");
-    Sound musicaPerseguicao = LoadSound("Sons e Musica/Funeral in Sinaloa - Jimena Contreras.mp3");
+    Music musicasFase[5], musica;
+    carregarMusicas(musicasFase, &musica);
+    
+    Sound youDied, musicaPerseguicao, musicaEncerramento;
+    carregarSons(&youDied, &musicaPerseguicao, &musicaEncerramento);
+    
     PlayMusicStream(musica);
+    
+    //flags de controle dos sons
     int musicaTocando = 0;//musica de perseguicao
     int musicaDelay = 0;
     
@@ -113,29 +118,25 @@ int main() {
            
             //SALVAR A PONTUACAO DO JOGADOR
             if (!gravouScore) {
-                StopMusicStream(musicaFase1);
+                StopMusicStream(musicasFase[0]);
                 if (musicaTocando) {
                     StopSound(musicaPerseguicao);
                     musicaTocando = 0;
                 }
                 PlaySound(musicaEncerramento);
                 SetSoundVolume(musicaEncerramento, 0.8);
-                FILE *file = fopen("highscore.txt", "a");
-                if (file == NULL) {
-                    printf("Erro ao abrir o arquivo highscore.txt\n");
-                    exit(1);
-                }
-                fprintf(file, "%s,%d\n", menu.nome, jogador.score);
-                fclose(file);
+                
+                salvarScore(menu.nome, jogador.score);
                 
                 //organizar o ranking
-                file = fopen("highscore.txt", "r");
+                FILE *file = fopen("highscore.txt", "r");
                 if(file == NULL){
                     printf("falha na leitura do arquivo.\n");
                     exit(1);
                 }
                 ranking = organizaRanking(file);
                 fclose(file);
+
                 gravouScore = 1;
             }
 
@@ -148,7 +149,7 @@ int main() {
         
 
         if (perdeu) {  
-            StopMusicStream(musicaFase1);
+            StopMusicStream(musicasFase[0]);
             SetSoundVolume(youDied, 2.5);
             PlaySound(youDied);
             
@@ -179,7 +180,7 @@ int main() {
                     reiniciarFase(&jogador, &fase);
                     if (fase.faseAtual <= 3)    
                         fase.qtdInimigos = fase.faseAtual;
-                    PlayMusicStream(musicaFase1);
+                    PlayMusicStream(musicasFase[0]);
                     //fase.inimigos = inicializarInimigos();
                 }
             }
@@ -199,12 +200,12 @@ int main() {
             camera.target = jogador.centro;
             if (!musicaFaseTocando) {//CRIAR UM VETOR E TOCAR A MUSICA DE (IND_FASE + 1)
                 StopMusicStream(musica);
-                PlayMusicStream(musicaFase1);
+                PlayMusicStream(musicasFase[0]);
                 musicaFaseTocando = 1;
                 musicaTocando = 0;
             }
             
-            UpdateMusicStream(musicaFase1);
+            UpdateMusicStream(musicasFase[0]);
             
             while (entrouNaPorta) {
                 
@@ -221,7 +222,7 @@ int main() {
  
                     //qtdInimigos++;
                     reiniciarFase(&jogador, &fase);
-                    PlayMusicStream(musicaFase1);
+                    PlayMusicStream(musicasFase[0]);
                     //fase.inimigos = inicializarInimigos();
                     entrouNaPorta = 0;    
                     fase.faseAtual++;
@@ -326,7 +327,7 @@ int main() {
                     float distCampoVisaoinimigoC = sqrt(pow(jogador.centro.x - fase.inimigos[i].centro.x, 2) + pow(jogador.centro.y - fase.inimigos[i].centro.y, 2));
                     if (distCampoVisaoinimigoC < jogador.campoVisao) {//se tiver dentro do campo de visao
                         if (!musicaTocando) {
-                            PauseMusicStream(musicaFase1);
+                            PauseMusicStream(musicasFase[0]);
                             PlaySound(musicaPerseguicao);
                             SetSoundVolume(musicaPerseguicao, 0.6);
                             musicaTocando = 1;
@@ -340,7 +341,7 @@ int main() {
                                 musicaDelay--;
                             }
                             else {   
-                                ResumeMusicStream(musicaFase1);//continua de onde parou
+                                ResumeMusicStream(musicasFase[0]);//continua de onde parou
                                 StopSound(musicaPerseguicao);
                                 musicaTocando = 0;
                             }
@@ -561,7 +562,30 @@ int main() {
     return 0; 
 }
 
-Fase criarFase(int numFase) {//usa o endereco do jogador para poder alterar a posicao e outros fatores
+void carregarMusicas(Music *musicasFase, Music *musicaMenu) {
+    (*musicaMenu) = LoadMusicStream("Sons e Musica/Spooked - Mini Vandals.mp3");
+    for (int i = 0; i < 5; i++) {
+        musicasFase[i] = LoadMusicStream("Sons e Musica/musicaFase1.mp3");
+    }
+}
+
+void carregarSons(Sound *youDied, Sound *musicaPerseguicao, Sound *musicaEncerramento) {
+    (*youDied) = LoadSound("Sons e Musica/you_died_DS.mp3");
+    (*musicaEncerramento) = LoadSound("Sons e Musica/Dramatic Series Theme - Freedom Trail Studio.mp3");
+    (*musicaPerseguicao) = LoadSound("Sons e Musica/Funeral in Sinaloa - Jimena Contreras.mp3");
+}
+
+void salvarScore(char *nome, int score) {
+    FILE *file = fopen("highscore.txt", "a");
+    if (file == NULL) {
+        printf("Erro ao abrir o arquivo highscore.txt\n");
+        exit(1);
+    }
+    fprintf(file, "%s,%d\n", nome, score);
+    fclose(file);
+}
+
+Fase criarFase(int numFase) {
     
     Fase fase;
     
@@ -590,7 +614,7 @@ Fase criarFase(int numFase) {//usa o endereco do jogador para poder alterar a po
     return fase;
 }
 
-void reiniciarFase(Player *jogador, Fase *fase) {
+void reiniciarFase(Player *jogador, Fase *fase) {//usa o endereco do jogador para poder alterar a posicao e outros fatores
     int width = GetScreenWidth();
     int height = GetScreenHeight();
     jogador->textura = LoadTexture("Sprites e Texturas/sprite1.png");
