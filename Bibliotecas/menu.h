@@ -2,13 +2,14 @@
 #include <stdio.h>
 
 typedef struct{
-    Texture FNAU;
     Texture BG;
+    Texture creditos;
     int h;
     int w;
     int continua;
     char nome[12];
     Vector2 mouse;
+    Vector2 creditosPos;
 } Menu;
 
 typedef struct{
