@@ -5,6 +5,7 @@
 #include "menu.h"
 
 void iniciaMenu(Menu *menu){ //funcao pra inicializar a struct menu
+    (*menu).FNAU = LoadTexture("./Sprites e Texturas/FNAU.png");
     (*menu).BG = LoadTexture("./Sprites e Texturas/bg_1.png");
     (*menu).continua = 0;
     (*menu).w = GetScreenWidth();
@@ -28,10 +29,15 @@ Menu desenhaMenu(Menu menu){
     menu.mouse = GetMousePosition(); //essa funcao devolve as coordenadas do mouse (X, Y)
         
     BeginDrawing(); //comeca a desenhar
-       
+    ClearBackground(LIGHTGRAY); //limpa o plano de fundo
+    DrawTexture(menu.FNAU, 125, 140, BLANK);
+    WaitTime(05);//o tempo de "exibicao" da logo
+    EndDrawing();
+    
+    BeginDrawing(); //comeca a desenhar   
     ClearBackground(BLACK); //limpa o plano de fundo
     DrawTexture(menu.BG, 0, 0, WHITE); //desenha o plano de fundo do menu (WHITE por que tira o PNG)
-    DrawText("FIVE NIGHTS AT UFPE", 125, 200, 140, MAROON); 
+    DrawTexture("FIVE NIGHTS AT UFPE", 125, 200, 140, MAROON); 
     DrawText("Iniciar", 750, 825, 120, WHITE); //desenhando textos
     
     //Colocando opcao para digitar o nome do usuario
