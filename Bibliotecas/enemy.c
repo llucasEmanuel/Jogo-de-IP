@@ -25,12 +25,12 @@ Enemy *inicializarInimigos(int numFase) {
             sprintf(file, "Sprites e Texturas/mars/marsS%d.png", i+1);
             inimigos[j].textura[i] = LoadTexture(file);
         }
-        for (int i = 0; i < 1 && j == 1; i++) {//SALTYPAUL
+        for (int i = 0; i < 4 && j == 1; i++) {//SALTYPAUL
             char file[20];
             sprintf(file, "Sprites e Texturas/saltyPaul/saltyPaulS%d.png", i+1);
             inimigos[j].textura[i] = LoadTexture(file);
         }
-        for (int i = 0; i < 1 && j == 2; i++) {//NIVAN
+        for (int i = 0; i < 4 && j == 2; i++) {//NIVAN
             char file[20];
             sprintf(file, "Sprites e Texturas/nivan/nivanS%d.png", i+1);
             inimigos[j].textura[i] = LoadTexture(file);
@@ -40,31 +40,11 @@ Enemy *inicializarInimigos(int numFase) {
     for (int i = 0; i < numFase; i++) {//inicializar os atributos de cada inimigo
         inimigos[i].coordenadas = (Vector2) {(float) (rand() % (width - (inimigos[i].textura[0].width * 8))), (float) (rand() % (height - (inimigos[i].textura[0].height * 8)))};
         inimigos[i].centro = (Vector2) {(2*inimigos[i].coordenadas.x + 8*inimigos[i].textura[0].width)/2, (2*inimigos[i].coordenadas.y + 8*inimigos[i].textura[0].height)/2};
-        inimigos[i].detectouJogador = 0; 
+        inimigos[i].detectouJogador = 0;
+        inimigos[i].colisao = 0;
     }
     return inimigos;
 }
-
-// Enemy *atualizarVetorInimigos(Enemy *inimigos, int *qtdInimigos) {
-    // int height = GetScreenHeight();
-    // int width = GetScreenWidth();
-    // Enemy *ptrAux = (Enemy *) realloc(inimigos, ((*qtdInimigos) + 1) * sizeof(Enemy));
-    // if (ptrAux == NULL) {
-        // free(inimigos);
-        // printf("Problema de alocacao de memoria.\n");
-        // exit(1);
-    // }
-    // inimigos = ptrAux;
-    // (*qtdInimigos)++;
-    
-    // //INICIALIZAR O INIMIGO DE INDICE [(*qtdInimigos) - 1]
-    // // inimigos[(*qtdInimigos) - 1].textura = LoadTexture("Sprites e Texturas/saltyPaul.png");
-    // // inimigos[(*qtdInimigos) - 1].coordenadas = (Vector2) {(float) (rand() % (width - (inimigos[(*qtdInimigos) - 1].textura.width * 8))), (float) (rand() % (height - (inimigos[(*qtdInimigos) - 1].textura.height * 8)))};
-    // // inimigos[(*qtdInimigos) - 1].centro = (Vector2) {(2*inimigos[(*qtdInimigos) - 1].coordenadas.x + 8*inimigos[0].textura.width)/2, (2*inimigos[(*qtdInimigos) - 1].coordenadas.y + 8*inimigos[(*qtdInimigos) - 1].textura.height)/2};
-    // // inimigos[(*qtdInimigos) - 1].detectouJogador = 0;
-    
-    // return inimigos;
-// }
 
 void moveInimigoCirculos(Enemy *inimigo, int qtdInimigos) {//cria um padrao de movimentacao para o inimigo
     
