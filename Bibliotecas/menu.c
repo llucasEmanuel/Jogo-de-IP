@@ -5,11 +5,13 @@
 #include "menu.h"
 
 void iniciaMenu(Menu *menu){ //funcao pra inicializar a struct menu
-    (*menu).FNAU = LoadTexture("./Sprites e Texturas/FNAU.png");
     (*menu).BG = LoadTexture("./Sprites e Texturas/bg_1.png");
+    (*menu).creditos = LoadTexture("./Sprites e Texturas/theOneFromMars.png");
     (*menu).continua = 0;
     (*menu).w = GetScreenWidth();
     (*menu).h = GetScreenHeight();
+    (*menu).creditosPos.x = 900;
+    (*menu).creditosPos.y = 200;
     strcpy((*menu).nome, "\0");
 }
 
@@ -20,24 +22,16 @@ void iniciaComando(Comando *comando){ //funcao que inicializa a struct comando
         (*comando).d = LoadTexture("./Sprites e Texturas/D.png"); //carregando as texturas dos comandos
         (*comando).continua = 0;
 }
-int delay = 300;
+
 Menu desenhaMenu(Menu menu){
     
     int flag = 0;
     int apertou = 0;
     
     menu.mouse = GetMousePosition(); //essa funcao devolve as coordenadas do mouse (X, Y)
-
-    while (delay > 0) {
-        delay--;
-        BeginDrawing(); //comeca a desenhar
-        ClearBackground(LIGHTGRAY); //limpa o plano de fundo
-        DrawTextureEx(menu.FNAU, (Vector2) {-430, 115}, 0, 1.6, WHITE);
-        //WaitTime(05);//o tempo de "exibicao" da logo
-        EndDrawing();
-    }
-    
-    BeginDrawing(); //comeca a desenhar   
+        
+    BeginDrawing(); //comeca a desenhar
+       
     ClearBackground(BLACK); //limpa o plano de fundo
     DrawTexture(menu.BG, 0, 0, WHITE); //desenha o plano de fundo do menu (WHITE por que tira o PNG)
     DrawText("FIVE NIGHTS AT UFPE", 125, 200, 140, MAROON); 
@@ -283,6 +277,7 @@ Menu desenhaMenu(Menu menu){
         
         if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && strlen(menu.nome) != 0){ //se aperta o botao esquerto do mouse, 
             menu.continua = 1;
+            UnloadTexture(menu.creditos);
             UnloadTexture(menu.BG); //"descarregando" a textura carregada
         }
         else if(IsMouseButtonDown(MOUSE_LEFT_BUTTON) && strlen(menu.nome) == 0){
@@ -299,13 +294,19 @@ Menu desenhaMenu(Menu menu){
     while(flag == 1){
         BeginDrawing();
         ClearBackground(BLACK);
-        DrawText("MARCELO ARCOVERDE NEVES", 100, 100, 60, WHITE);
-        DrawText("LUCAS EMANUEL ANSD", 100, 200, 60, WHITE);
-        DrawText("Aperte [SPACE] para voltar para o menu", (menu.w / 2) - (MeasureText("Aperte [SPACE] para voltar para o menu", 50) / 2), menu.h - 100, 50, GRAY);
+        DrawTextureEx(menu.creditos, menu.creditosPos, 0, 15, WHITE);
+        DrawText("GRUPO 3", 100, 100, 60, MAROON);
+        DrawText("MARCELO ARCOVERDE NEVES", 100, 600, 50, WHITE);
+        DrawText("LUCAS EMANUEL SABINO", 100, 500, 50, WHITE);
+        DrawText("KALANI RAFAEL VIEIRA", 100, 300, 50, WHITE);
+        DrawText("LUANA GOMES LUCENA", 100, 400, 50, WHITE);
+        DrawText("GABRIEL VALENCA MAYERHOFER", 100, 200, 50, WHITE);
+        DrawText("PAULO VITOR BARBOSA SANTANA", 100, 700, 50, WHITE);
+        DrawText("Pressione e solte [SPACE] para voltar para o menu", (menu.w / 2) - (MeasureText("Pressione e solte [SPACE] para voltar para o menu", 50) / 2), menu.h - 100, 50, GRAY);
         
         
         if(IsKeyDown(KEY_SPACE)){
-            DrawText("Aperte [SPACE] para voltar para o menu", (menu.w / 2) - (MeasureText("Aperte [SPACE] para voltar para o menu", 50) / 2), menu.h - 100, 50, MAROON);
+            DrawText("Pressione e solte [SPACE] para voltar para o menu", (menu.w / 2) - (MeasureText("Pressione e solte [SPACE] para voltar para o menu", 50) / 2), menu.h - 100, 50, MAROON);
             apertou = 1;
             
         }
@@ -341,7 +342,7 @@ Comando iniciaJogo(Comando comando){
             DrawText("- ANDAR PARA BAIXO", 240, 460, 50, WHITE);
             DrawTexture(comando.d, 150, 600, WHITE);
             DrawText("- ANDAR PARA DIREITA", 240, 610, 50, WHITE);
-            DrawText("APERTE [SPACE] PARA CONTINUAR", 295, 850, 75, GRAY); //desenha as teclas e o que elas fazem
+            DrawText("APERTE ESPAÇO PARA CONTINUAR", 295, 850, 75, GRAY); //desenha as teclas e o que elas fazem
             
             DrawText("Você deve procurar", 1200, 200, 40, GRAY);
             DrawText("pela chave do GRAD 05 na", 1200, 250, 40, GRAY);
