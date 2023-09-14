@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 typedef struct{
+    Texture FNAU;
     Texture BG;
     int h;
     int w;
