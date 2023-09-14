@@ -9,7 +9,9 @@
 #include "collectable.h"
 #include "enemy.h"
 
+//CRIAR UM "settings.h" que vai ter as funcoes de inicializar musicas, camera, ...
 #define SILVER (Color) {192, 192, 192, 255}
+#define BRANCO (Color) {255, 255, 255, 180}
 
 typedef struct {
     Enemy *inimigos;
@@ -17,36 +19,33 @@ typedef struct {
     Collectable porta;
     Collectable *baterias;
     Collectable vida;
+    Texture mapa;
     int qtdBaterias;
     int qtdInimigos;
     int faseAtual;
 } Fase;
 
+Camera2D inicializarCamera(Player jogador);
 void carregarMusicas(Music *musicasFase, Music *musicaMenu);
 void carregarSons(Sound *youDied, Sound *musicaPerseguicao, Sound *musicaEncerramento);
 void salvarScore(char *nome, int score);
+void printTelaEncerramento(Ranking *ranking);
 Fase criarFase(int numFase);
 void reiniciarFase(Player *jogador, Fase *fase);
-
 
 int main() {
     
     srand(time(NULL));
     
     InitWindow(1920, 1080, "FNAU");
-    //if (!IsWindowFullscreen()) ToggleFullscreen();
     int height = GetScreenHeight();
     int width = GetScreenWidth();
+    SetTargetFPS(60);
     
     Player jogador = inicializarJogador();//inicializa jogador fora do criarFase para manter o score para as outras fases
     Fase fase = criarFase(1);
-    //INICIALIZACAO DOS INIMIGOS FORA DO DOMINIO DA FASE
-    //Enemy *vetorInimigos = inicializarInimigos();//guarda os inimigos
-    int qtdInimigos = 1;
-    
-    //fase.inimigos = vetorInimigos;
-    //Texture mapa = LoadTexture("Sprites e Texturas/mapa.png");
-    fase.qtdInimigos = qtdInimigos;
+    fase.qtdInimigos = 1;
+    fase.mapa = LoadTexture("Sprites e Texturas/mapa.png");
     
     //INICIALIZACAO DOS SONS E MUSICAS
     InitAudioDevice();
@@ -58,16 +57,14 @@ int main() {
     carregarSons(&youDied, &musicaPerseguicao, &musicaEncerramento);
     
     PlayMusicStream(musica);
-    
     //flags de controle dos sons
     int musicaTocando = 0;//musica de perseguicao
     int musicaDelay = 0;
-    
-    SetTargetFPS(60);
-    
     //
+    
     Font fonteDS = LoadFont("OptimusPrinceps.ttf");
     //FLAGS PARA CONTROLE DOS EVENTOS DA FASE
+    //colocar as flags dentro das structs
     int entrouNaPorta = 0;
     int perdeu = 0;
     int deathCount = 0;
@@ -81,11 +78,7 @@ int main() {
     iniciaComando(&comando);
     
     //INICIALIZA A CAMERA
-    Camera2D camera = {0};
-    camera.target = jogador.centro;
-    camera.offset = (Vector2) {width/2, height/2};
-    camera.rotation = 0;
-    camera.zoom = 1;
+    Camera2D camera = inicializarCamera(jogador);
     
     //AUXILIAR RANKING
     Ranking *ranking = NULL;
@@ -107,15 +100,10 @@ int main() {
         int tamBarra = 240 - 80*deathCount;
         
         int gravouScore = 0;//garante que nao vai gravar o score varias vezes no loop
+        
+        //TELA DE ENCERRAMENTO
         while (fase.faseAtual > 5 && !IsKeyDown(KEY_ESCAPE)) {
             
-            BeginDrawing();
-            ClearBackground(RAYWHITE);
-            DrawText("PARABENS, VOCE SOBREVIVEU A UFPE...", width / 2 - MeasureText("PARABENS, VOCE SOBREVIVEU A UFPE...", 60) / 2, height / 2 - 450, 60, BLACK); 
-            DrawText("POR ENQUANTO!", width / 2 - MeasureText("POR ENQUANTO!", 90) / 2, height / 2 - 350, 90, MAROON); 
-
-            DrawText("RANKING", width / 2 - 150, height / 2 - 125, 50, MAROON);
-           
             //SALVAR A PONTUACAO DO JOGADOR
             if (!gravouScore) {
                 StopMusicStream(musicasFase[0]);
@@ -126,8 +114,7 @@ int main() {
                 PlaySound(musicaEncerramento);
                 SetSoundVolume(musicaEncerramento, 0.8);
                 
-                salvarScore(menu.nome, jogador.score);
-                
+                salvarScore(menu.nome, jogador.score);   
                 //organizar o ranking
                 FILE *file = fopen("highscore.txt", "r");
                 if(file == NULL){
@@ -140,13 +127,9 @@ int main() {
                 gravouScore = 1;
             }
 
-            for(int i = 0; i < ranking[0].qtdPessoas && i < 10; i++){
-                DrawText(TextFormat("%d. %s - %d", i + 1, ranking[i].nome, ranking[i].pontuacao), width/2 - 200, height / 2 + (50 * i) - 25, 40, BLACK);
-            }
-            EndDrawing();
-
+            printTelaEncerramento(ranking);
         }
-        
+        //
 
         if (perdeu) {  
             StopMusicStream(musicasFase[0]);
@@ -155,6 +138,11 @@ int main() {
             
             if (jogador.score >= 200) jogador.score -= 200;//perde 200 pontos toda vez que morre
             else (jogador.score) = 0;
+            
+            int ind = -1;
+            for (int i = 0; i < fase.qtdInimigos && ind != i; i++) {
+                if (fase.inimigos[i].colisao == 1) ind = i;
+            }
             
             while (perdeu) {
                
@@ -165,17 +153,30 @@ int main() {
                
                 BeginDrawing();
                 ClearBackground(BLACK);
-          
-                DrawTextEx(fonteDS, "VOCE CHEGOU 2 MINUTOS ATRASADO!", (Vector2) {width / 2 - MeasureText("VOCE CHEGOU 2 MINUTOS ATRASADO!", 70)/ 2 + 25, height / 2 - 70}, 70, 3, MAROON);
-                //else if (fase.faseAtual == 2)
-                   // DrawTextEx(fonteDS, "NIVAN NAO IRA ... NAO IRA NOS SALVAR", (Vector2) {width / 2 - MeasureText("NIVAN NAO IRA ... NAO IRA NOS SALVAR", 70)/ 2 + 25, height / 2 - 70}, 70, 3, MAROON);
-
+                
+                if (ind != -1) {
+                    switch (ind) {
+                        case 0://MS
+                            DrawTextEx(fonteDS, "VOCE CHEGOU 2 MINUTOS ATRASADO", (Vector2) {width / 2 - MeasureText("VOCE CHEGOU 2 MINUTOS ATRASADO", 70)/ 2 + 25, height / 2 - 70}, 70, 3, MAROON);
+                            break;
+                        case 1://PS
+                            DrawTextEx(fonteDS, "PAULO SALGADO NAO IRA... NAO IRA NOS SALVAR", (Vector2) {width / 2 - MeasureText("PAULO SALGADO NAO IRA... NAO IRA NOS SALVAR", 70)/ 2 + 25, height / 2 - 70}, 70, 3, MAROON);
+                            break;
+                        case 2://NV
+                            DrawTextEx(fonteDS, "ISSO ERA TRIVIAL", (Vector2) {width / 2 - MeasureText("ISSO ERA TRIVIAL", 70)/ 2 + 25, height / 2 - 70}, 70, 3, MAROON);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+               
                 DrawText("Aperte [SPACE] para continuar", width/2 - MeasureText("Aperte [SPACE] para continuar", 50)/2, 980, 50, GRAY);
                 EndDrawing();
                 
                 if (IsKeyPressed(KEY_SPACE)) {
                     StopSound(youDied);
                     perdeu = 0;
+                    fase.inimigos[ind].colisao = 0;
                     //Reiniciar a fase
                     reiniciarFase(&jogador, &fase);
                     if (fase.faseAtual <= 3)    
@@ -202,7 +203,7 @@ int main() {
                 StopMusicStream(musica);
                 PlayMusicStream(musicasFase[0]);
                 musicaFaseTocando = 1;
-                musicaTocando = 0;
+                musicaTocando = 0; 
             }
             
             UpdateMusicStream(musicasFase[0]);
@@ -253,8 +254,6 @@ int main() {
             BeginDrawing();
             
             jogador.campoVisao = 150 + (35 * jogador.qtdBaterias);//raio do campo de visao
-            //DrawCircle(camera.target.x, camera.target.y, jogador.campoVisao, WHITE);//campo de visao
-            //atualiza o centro do jogador
             jogador.centro = (Vector2) {(2*jogador.coordenadas.x + 0.33*jogador.textura.width)/2, (2*jogador.coordenadas.y + 0.33*jogador.textura.height)/2};
             //atualiza o centro do inimigo
             for (int i = 0; i < fase.qtdInimigos; i++) {
@@ -262,10 +261,10 @@ int main() {
             }
             ClearBackground(BLACK);
             
-            
             BeginMode2D(camera);//ativa a camera
             //DrawTextureEx(mapa, (Vector2) {0, 0}, 0, 1, WHITE);
             
+            //DrawTextureEx(fase.mapa, (Vector2){0, 0}, 0, 1, BRANCO);
             //DEFINE A COR BASE DE CADA FASE
             Color cores[5] = {WHITE, MAROON, SKYBLUE, ORANGE, GRAY};
             Color cor;
@@ -309,8 +308,7 @@ int main() {
                 
                 DrawRectangle(fase.porta.hitbox.x, fase.porta.hitbox.y, fase.porta.hitbox.width, fase.porta.hitbox.height, BLANK);
             }
-            
-            //DESENHA INIMIGOS
+           
             if (!perdeu) {
                 for (int i = 0; i < fase.qtdInimigos; i++) {
                     
@@ -318,9 +316,7 @@ int main() {
                     acumulador += deltaT;
                     
                     if (acumulador >= tempoFrame) {
-                        if (i == 0)
-                            frameAtual = ((frameAtual + 1) % 4);
-                        else frameAtual = ((frameAtual + 1) % 1);
+                        frameAtual = ((frameAtual + 1) % 4);
                         acumulador -= tempoFrame;
                     }
                     
@@ -427,13 +423,14 @@ int main() {
             moverJogador(&jogador);
             perseguirJogador(fase.inimigos, jogador, fase.qtdInimigos);
           
-            
+            //CHECA SE HOUVE COLISAO COM O INIMIGO
             for (int i = 0; i < fase.qtdInimigos; i++) {
                 if (CheckCollisionRecs(jogador.hitbox, fase.inimigos[i].hitbox)) {
                     DrawTextureEx(jogador.textura, jogador.coordenadas, 0, 0.33, cor);
                     printf("Colisao INIMIGO\n");
                     UnloadTexture(jogador.textura);
                     jogador.hitbox = (Rectangle) {0, 0, 0, 0};
+                    fase.inimigos[i].colisao = 1;
                     perdeu = 1;
                     deathCount++;
                 }
@@ -543,7 +540,7 @@ int main() {
     UnloadTexture(chave.textura);
     UnloadTexture(bateria.textura);
     UnloadTexture(fase.vida.textura);
-    //UnloadTexture(mapa);
+    UnloadTexture(fase.mapa);
     for (int i = 0; i < fase.qtdInimigos; i++) {
         for (int j = 0; j < 4; j++)
             UnloadTexture(fase.inimigos[i].textura[j]); 
@@ -560,6 +557,17 @@ int main() {
     CloseWindow();
 
     return 0; 
+}
+
+Camera2D inicializarCamera(Player jogador) {
+    int height = GetScreenHeight();
+    int width = GetScreenWidth();
+    Camera2D camera = {0};
+    camera.target = jogador.centro;
+    camera.offset = (Vector2) {width/2, height/2};
+    camera.rotation = 0;
+    camera.zoom = 1;
+    return camera;
 }
 
 void carregarMusicas(Music *musicasFase, Music *musicaMenu) {
@@ -585,13 +593,27 @@ void salvarScore(char *nome, int score) {
     fclose(file);
 }
 
+void printTelaEncerramento(Ranking *ranking) {
+    int height = GetScreenHeight();
+    int width = GetScreenWidth();
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
+    DrawText("PARABENS, VOCE SOBREVIVEU A UFPE...", width / 2 - MeasureText("PARABENS, VOCE SOBREVIVEU A UFPE...", 60) / 2, height / 2 - 450, 60, BLACK); 
+    DrawText("POR ENQUANTO!", width / 2 - MeasureText("POR ENQUANTO!", 90) / 2, height / 2 - 350, 90, MAROON); 
+    for(int i = 0; i < ranking[0].qtdPessoas && i < 10; i++){
+        DrawText(TextFormat("%d. %s - %d", i + 1, ranking[i].nome, ranking[i].pontuacao), width/2 - 200, height / 2 + (50 * i) - 25, 40, BLACK);
+    }
+    EndDrawing();
+    DrawText("RANKING", width / 2 - 150, height / 2 - 125, 50, MAROON);
+}
+
 Fase criarFase(int numFase) {
     
     Fase fase;
     
     //INICIALIZAR INIMIGOS
     fase.inimigos = inicializarInimigos(numFase);
-    if (numFase <= 3) fase.qtdInimigos = numFase;
+    if (numFase <= 3) fase.qtdInimigos = numFase; 
     else fase.qtdInimigos = 3;
  
     //INICIALIZACAO DAS BATERIAS
