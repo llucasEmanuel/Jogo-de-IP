@@ -9,6 +9,7 @@ typedef struct {
     Rectangle hitbox;
     Vector2 centro;
     int detectouJogador;
+    int colisao;
 } Enemy;
 
 Enemy *inicializarInimigos(int numFase);
