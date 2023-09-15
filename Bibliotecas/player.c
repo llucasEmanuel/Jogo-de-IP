@@ -24,54 +24,54 @@ void moverJogador(Player *jogador) { //TUDO CONFIGURADO LEVANDO EM CONSIDERACAO 
     
     if (IsKeyDown(KEY_W) && pode_w == 1) {
         if (IsKeyDown(KEY_D) && pode_d == 1) {
-            jogador->coordenadas.y -= GetFrameTime() * (150 * sqrt(2));
-            jogador->coordenadas.x += GetFrameTime() * (150 * sqrt(2));
+            jogador->coordenadas.y -= GetFrameTime() * (125 * sqrt(2));
+            jogador->coordenadas.x += GetFrameTime() * (120 * sqrt(2));
         }
         else if (IsKeyDown(KEY_A) && pode_a == 1) {
-            jogador->coordenadas.y -= GetFrameTime() * (150 * sqrt(2));
-            jogador->coordenadas.x -= GetFrameTime() * (150 * sqrt(2));
+            jogador->coordenadas.y -= GetFrameTime() * (120 * sqrt(2));
+            jogador->coordenadas.x -= GetFrameTime() * (120 * sqrt(2));
         }
         else{
-            jogador->coordenadas.y -= GetFrameTime() * 300;
+            jogador->coordenadas.y -= GetFrameTime() * 250;
         }  
     }
     else if (IsKeyDown(KEY_S) && pode_s == 1) {
         if (IsKeyDown(KEY_D) && pode_d == 1) {
-            jogador->coordenadas.y += GetFrameTime() * (150 * sqrt(2));
-            jogador->coordenadas.x += GetFrameTime() * (150 * sqrt(2));
+            jogador->coordenadas.y += GetFrameTime() * (125 * sqrt(2));
+            jogador->coordenadas.x += GetFrameTime() * (125 * sqrt(2));
         }
         else if (IsKeyDown(KEY_A) && pode_a == 1) {
-            jogador->coordenadas.y += GetFrameTime() * (150 * sqrt(2));
-            jogador->coordenadas.x -= GetFrameTime() * (150 * sqrt(2));
+            jogador->coordenadas.y += GetFrameTime() * (125 * sqrt(2));
+            jogador->coordenadas.x -= GetFrameTime() * (125 * sqrt(2));
         }
         else {
-            jogador->coordenadas.y += GetFrameTime() * 300;
+            jogador->coordenadas.y += GetFrameTime() * 250;
         }  
     }
     else if (IsKeyDown(KEY_A) && pode_a == 1) {
         if (IsKeyDown(KEY_W) && pode_w == 1) {
-            jogador->coordenadas.y -= GetFrameTime() * (150 * sqrt(2));
-            jogador->coordenadas.x -= GetFrameTime() * (150 * sqrt(2));
+            jogador->coordenadas.y -= GetFrameTime() * (125 * sqrt(2));
+            jogador->coordenadas.x -= GetFrameTime() * (125 * sqrt(2));
         }
         else if (IsKeyDown(KEY_S) && pode_s == 1) {
-            jogador->coordenadas.y += GetFrameTime() * (150 * sqrt(2));
-            jogador->coordenadas.x -= GetFrameTime() * (150 * sqrt(2));
+            jogador->coordenadas.y += GetFrameTime() * (125 * sqrt(2));
+            jogador->coordenadas.x -= GetFrameTime() * (125 * sqrt(2));
         }
         else {
-            jogador->coordenadas.x -= GetFrameTime() * 300;
+            jogador->coordenadas.x -= GetFrameTime() * 250;
         } 
     }
     else if (IsKeyDown(KEY_D) && pode_d == 1) {
         if (IsKeyDown(KEY_W) && pode_w) {
-            jogador->coordenadas.y -= GetFrameTime() * (150 * sqrt(2));
-            jogador->coordenadas.x += GetFrameTime() * (150 * sqrt(2));
+            jogador->coordenadas.y -= GetFrameTime() * (125 * sqrt(2));
+            jogador->coordenadas.x += GetFrameTime() * (125 * sqrt(2));
         }
         else if (IsKeyDown(KEY_S) && pode_s == 1) {
-            jogador->coordenadas.y += GetFrameTime() * (150 * sqrt(2));
-            jogador->coordenadas.x += GetFrameTime() * (150 * sqrt(2));
+            jogador->coordenadas.y += GetFrameTime() * (125 * sqrt(2));
+            jogador->coordenadas.x += GetFrameTime() * (125 * sqrt(2));
         }
         else {
-            jogador->coordenadas.x += GetFrameTime() * 300;
+            jogador->coordenadas.x += GetFrameTime() * 250;
         } 
     }
 }
