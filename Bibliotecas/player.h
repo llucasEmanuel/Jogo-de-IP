@@ -14,3 +14,4 @@ typedef struct {
 
 void moverJogador(Player *jogador);
 Player inicializarJogador();
+void atualizaJogador(Player *jogador);
