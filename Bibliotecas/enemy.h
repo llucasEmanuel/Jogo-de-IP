@@ -12,7 +12,7 @@ typedef struct {
     int colisao;
 } Enemy;
 
-Enemy *inicializarInimigos(int numFase);
+Enemy *inicializarInimigos(int numFase, Enemy *inimigos);
 void moveInimigoCirculos(Enemy *inimigo, int qtdInimigos);
 void perseguirJogador(Enemy *inimigos, Player jogador, int qtdInimigos);
 void atualizaInimigo(Enemy *inimigo);
