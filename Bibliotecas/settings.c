@@ -147,7 +147,7 @@ void desenharInimigo(Enemy *inimigo, Player jogador, float *acumulador, int *mus
             PlaySound(musicaPerseguicao);
             SetSoundVolume(musicaPerseguicao, 0.6);
             (*musicaTocando) = 1;
-            (*musicaDelay) = 300;//num de frames (5 segundos)
+            (*musicaDelay) = 240;//num de frames (5 segundos)
         }
         DrawTextureEx(inimigo->textura[(*frameAtual)], inimigo->coordenadas, 0, 8, WHITE);
     }
@@ -204,6 +204,7 @@ void desenharJogador(Player jogador) {
     DrawTextureEx(jogador.textura, jogador.coordenadas, 0, 0.33, WHITE);
     DrawRectangle(jogador.hitbox.x, jogador.hitbox.y, jogador.hitbox.width, jogador.hitbox.height, BLANK);
 }
+
 void gerarHUD(Camera2D camera, Fase fase, int *deathCount, CollectableContador *chave, CollectableContador *bateria, Player jogador) {
     //DESENHAR BARRA DE SANIDADE (A CADA MORTE ELA DIMINUI 1/3)
     DrawText("SANIDADE", camera.target.x - MeasureText("SANIDADE", 35)/2, camera.target.y - 500, 35, SILVER);
@@ -274,13 +275,21 @@ void pegarBateria(Collectable *bateria, Player *jogador, Color cor) {
     }
 }
 
-void pegarVida(Collectable *vida, Player *jogador, int *deathCount, Color cor) {
-    DrawTextureEx(vida->textura, vida->coordenadas, 0, 5, cor);
-    vida->colisao = 1;
-    jogador->pegouVida = 1;
-    printf("Colisao VIDA\n");
-    UnloadTexture(vida->textura);
-    vida->hitbox = (Rectangle) {0, 0, 0, 0};
-    jogador->score += 100;
-    if (*deathCount != 0) (*deathCount)--;//aumenta a barra de sanidade 
+void pegarVida(Collectable *vida, Player *jogador, int *deathCount, Color cor, int numFase) {
+    if ((*deathCount)) {
+        DrawTextureEx(vida->textura, vida->coordenadas, 0, 5, cor);
+        vida->colisao = 1;
+        jogador->pegouVida = 1;
+        printf("Colisao VIDA\n");
+        UnloadTexture(vida->textura);
+        vida->hitbox = (Rectangle) {0, 0, 0, 0};
+        jogador->score += 100;
+        if (*deathCount != 0) (*deathCount)--;//aumenta a barra de sanidade 
+    }
+    else {
+        if (numFase != 2)
+            DrawText("SANIDADE COMPLETA", vida->coordenadas.x - 180, vida->coordenadas.y - 40, 40, RED);
+        else
+            DrawText("SANIDADE COMPLETA", vida->coordenadas.x - 180, vida->coordenadas.y - 40, 40, SILVER);     
+    }
 }
