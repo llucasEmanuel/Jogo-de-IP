@@ -85,14 +85,21 @@ void moveInimigoCirculos(Enemy *inimigo, int qtdInimigos) {//cria um padrao de m
 
 void perseguirJogador(Enemy *inimigos, Player jogador, int qtdInimigos) {//inimigo tbm anda na diagonal
 
-
     for (int i = 0 ; i < qtdInimigos; i++) {
+  
         float deltaX = jogador.centro.x - inimigos[i].centro.x;//variacao em x
         float deltaY = jogador.centro.y - inimigos[i].centro.y;//variacao em y
         float distInimigoJogador = sqrt(pow(deltaX, 2) + pow(deltaY, 2));
         
         if (distInimigoJogador <= jogador.campoVisao) {//so ativa quando o inimigo ta dentro do campo de visao
             inimigos[i].detectouJogador = 1;
+        }
+        else{
+            int marcelo = 300;
+            while(marcelo > 0){
+                marcelo--;
+            }
+            inimigos[i].detectouJogador = 0;
         }
        
         if (inimigos[i].detectouJogador) {
@@ -147,7 +154,9 @@ void perseguirJogador(Enemy *inimigos, Player jogador, int qtdInimigos) {//inimi
             }
         }
         else{
+            
             moveInimigoCirculos(inimigos, qtdInimigos);
+            
         }
     }
 }
