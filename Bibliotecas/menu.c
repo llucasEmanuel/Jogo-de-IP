@@ -59,15 +59,14 @@ Menu desenhaMenu(Menu menu, Music musica){ // funcao responsavel por desenhar a 
     char letra[2];
     letra[0] = GetKeyPressed();
     letra[1] = '\0';
-    for(int i = 65; i < 91; i++){
-        if(letra[0] == i){
-            strcat(menu.nome, letra);
-        }
-    }
-    if(letra[0] == ' '){
+    
+    if(letra[0] >= 65 && letra[0] <= 90 && strlen(menu.nome) < 11){
         strcat(menu.nome, letra);
     }
-    if(letra[0] == '.'){
+    if(letra[0] == ' ' && strlen(menu.nome) < 11){
+        strcat(menu.nome, letra);
+    }
+    if(letra[0] == '.' && strlen(menu.nome) < 11){
         strcat(menu.nome, letra);
     }
     
