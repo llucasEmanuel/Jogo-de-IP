@@ -1,6 +1,8 @@
 #include <raylib.h>
 #include <stdio.h>
 
+//Structs e escopos do menu
+
 typedef struct{
     Texture BG;
     Texture creditos;
@@ -27,5 +29,5 @@ typedef struct{
 void iniciaMenu(Menu *menu);
 void iniciaComando(Comando *comando);
 Comando iniciaJogo(Comando comando);
-Menu desenhaMenu(Menu menu);
+Menu desenhaMenu(Menu menu, Music musica);
 Ranking *organizaRanking(FILE *arq);
