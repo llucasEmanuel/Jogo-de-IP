@@ -30,7 +30,16 @@ Menu desenhaMenu(Menu menu, Music musica){ // funcao responsavel por desenhar a 
     int apertouEspaco = 0; // auxiliares
     
     menu.mouse = GetMousePosition(); //essa funcao devolve as coordenadas do mouse (X, Y)
-        
+
+    while (delay > 0) {
+        delay--;
+        BeginDrawing(); //comeca a desenhar
+        ClearBackground(LIGHTGRAY); //limpa o plano de fundo
+        DrawTextureEx(menu.FNAU, (Vector2) {-430, 115}, 0, 1.6, WHITE);
+        //WaitTime(05);//o tempo de "exibicao" da logo
+        EndDrawing();
+    }
+    
     BeginDrawing(); //comeca a desenhar
        
     ClearBackground(BLACK); //limpa o plano de fundo
