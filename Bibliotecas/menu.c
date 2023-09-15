@@ -32,14 +32,14 @@ Menu desenhaMenu(Menu menu, Music musica){ // funcao responsavel por desenhar a 
     menu.mouse = GetMousePosition(); //essa funcao devolve as coordenadas do mouse (X, Y)
         
      Texture FNAU = LoadTexture("./Sprites e Texturas/FNAU.png");
-    ;
+    
      while (delay > 0) {
          delay--;
          BeginDrawing();
          ClearBackground(GRAY);
          DrawTextureEx(FNAU, (Vector2) {-450, 110} , 0, 1.6, WHITE);
          EndDrawing();
-     }
+     } // apos passar um tempo, sai a tela de inicializacao
         
     UnloadTexture(FNAU);
     
@@ -56,149 +56,21 @@ Menu desenhaMenu(Menu menu, Music musica){ // funcao responsavel por desenhar a 
     DrawText("Créditos", menu.w - MeasureText("Créditos", 50) - 125, menu.h - 200, 50, WHITE);
     
     //Configurando as letras do input do usuário
-    if (IsKeyPressed(KEY_Q) && strlen(menu.nome) < 12){
-   
-       
-           strcat(menu.nome, "Q"); 
-        
+    char letra[2];
+    letra[0] = GetKeyPressed();
+    letra[1] = '\0';
+    for(int i = 65; i < 91; i++){
+        if(letra[0] == i){
+            strcat(menu.nome, letra);
+        }
     }
-    if (IsKeyPressed(KEY_W) && strlen(menu.nome) < 12){
+    if(letra[0] == ' '){
+        strcat(menu.nome, letra);
+    }
+    if(letra[0] == '.'){
+        strcat(menu.nome, letra);
+    }
     
-       
-           strcat(menu.nome, "W"); 
-        
-    }
-    if (IsKeyPressed(KEY_E) && strlen(menu.nome) < 12){
-      
-           strcat(menu.nome, "E"); 
-        
-    }
-    if (IsKeyPressed(KEY_R) && strlen(menu.nome) < 12){
-      
-           strcat(menu.nome, "R"); 
-        
-    }
-    if (IsKeyPressed(KEY_T) && strlen(menu.nome) < 12){
-        
-            strcat(menu.nome, "T"); 
-        
-    }
-    if (IsKeyPressed(KEY_Y) && strlen(menu.nome) < 12){
-      
-           strcat(menu.nome, "Y"); 
-        
-    }
-    if (IsKeyPressed(KEY_U) && strlen(menu.nome) < 12){
-        
-           strcat(menu.nome, "U"); 
-        
-    }
-    if (IsKeyPressed(KEY_I) && strlen(menu.nome) < 12){
-        
-           strcat(menu.nome, "I"); 
-        
-    }
-    if (IsKeyPressed(KEY_O) && strlen(menu.nome) < 12){
-       
-           strcat(menu.nome, "O"); 
-        
-    }
-    if (IsKeyPressed(KEY_P) && strlen(menu.nome) < 12){
-   
-           strcat(menu.nome, "P"); 
-        
-    }
-    if (IsKeyPressed(KEY_A) && strlen(menu.nome) < 12){
-    
-           strcat(menu.nome, "A"); 
-        
-    }
-    if (IsKeyPressed(KEY_S) && strlen(menu.nome) < 12){
-      
-           strcat(menu.nome, "S"); 
-        
-    }
-    if (IsKeyPressed(KEY_D) && strlen(menu.nome) < 12){
-      
-           strcat(menu.nome, "D"); 
-        
-    }
-    if (IsKeyPressed(KEY_F) && strlen(menu.nome) < 12){
-        
-           strcat(menu.nome, "F"); 
-        
-    }
-    if (IsKeyPressed(KEY_G) && strlen(menu.nome) < 12){
-       
-           strcat(menu.nome, "G"); 
-        
-    }
-    if (IsKeyPressed(KEY_H) && strlen(menu.nome) < 12){
-        
-           strcat(menu.nome, "H"); 
-        
-    }
-    if (IsKeyPressed(KEY_J) && strlen(menu.nome) < 12){
-        
-           strcat(menu.nome, "J"); 
-        
-    }
-    if (IsKeyPressed(KEY_K) && strlen(menu.nome) < 12){
-       
-           strcat(menu.nome, "K"); 
-        
-    }
-    if (IsKeyPressed(KEY_L) && strlen(menu.nome) < 12){
-       
-           strcat(menu.nome, "L"); 
-        
-    }
-    if (IsKeyPressed(KEY_Z) && strlen(menu.nome) < 12){
-      
-           strcat(menu.nome, "Z"); 
-        
-    }
-    if (IsKeyPressed(KEY_X) && strlen(menu.nome) < 12){
-      
-           strcat(menu.nome, "X"); 
-        
-    }
-    if (IsKeyPressed(KEY_C) && strlen(menu.nome) < 12){
-       
-           strcat(menu.nome, "C"); 
-        
-    }
-    if (IsKeyPressed(KEY_V) && strlen(menu.nome) < 12){
-        
-       
-           strcat(menu.nome, "V"); 
-        
-    }
-    if (IsKeyPressed(KEY_B) && strlen(menu.nome) < 12){
-        
-           strcat(menu.nome, "B"); 
-        
-    }
-    if (IsKeyPressed(KEY_N) && strlen(menu.nome) < 12){
-       
-           strcat(menu.nome, "N"); 
-        
-    }
-    if (IsKeyPressed(KEY_M) && strlen(menu.nome) < 12){
-        
-           strcat(menu.nome, "M"); 
-        
-    }
-    if (IsKeyPressed(KEY_SPACE) && strlen(menu.nome) < 12){
-        
-           strcat(menu.nome, " "); 
-        
-    }
-    if (IsKeyPressed(KEY_PERIOD) && strlen(menu.nome) < 12){
-        
-           strcat(menu.nome, "."); 
-        
-    }
     if(strlen(menu.nome) != 0 && IsKeyPressed(KEY_BACKSPACE)){
         menu.nome[strlen(menu.nome) - 1] = '\0';
     } // quando aperta backspace, ultimo caracter eh substituido por '\0'
@@ -338,7 +210,7 @@ Ranking* organizaRanking(FILE *arq){ // funcao que le o arquivo do ranking e org
                 }
             }
         }
-    } //bubble sort
+    } // bubble sort
     
     ranking[0].qtdPessoas = qtd; // passando a quantidade de pessoas em um parametro "aleatorio" para auxiliar o controle
     
