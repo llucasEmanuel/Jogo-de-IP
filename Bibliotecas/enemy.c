@@ -7,10 +7,10 @@
 //#include "player.h"
 
 
-Enemy *inicializarInimigos(int numFase) {
+Enemy *inicializarInimigos(int numFase, Enemy *inimigos) {
     int height = GetScreenHeight();
     int width = GetScreenWidth();
-    Enemy *inimigos = NULL;
+    if (numFase == 1) inimigos = NULL;
     Enemy *ptrAux = (Enemy *) realloc(inimigos, sizeof(Enemy) * numFase);
     if (ptrAux == NULL) {
         printf("Problema de alocacao de memoria.\n");
@@ -50,38 +50,36 @@ void moveInimigoCirculos(Enemy *inimigo, int qtdInimigos) {//cria um padrao de m
     
     srand(time(NULL));
     int x;
-    //for(int i = 0; i < qtdInimigos; i++){
+    for(int i = 0; i < qtdInimigos; i++){
         int pode_direita = 1, pode_cima = 1, pode_baixo = 1, pode_esquerda = 1;
-        x = (rand() % 8) + 1; //gera numero de 1 a 8 pra decidir onde o cara vai (dobrei o numero de opcoes pra ver se ele n fica rodando em um quadrado so)
+        x = (rand() % 4) + 1; //gera numero de 1 a 8 pra decidir onde o cara vai (dobrei o numero de opcoes pra ver se ele n fica rodando em um quadrado so)
         
-        
-        
-        if(inimigo->coordenadas.x >= 1700){
+        if(inimigo[i].coordenadas.x >= 1700){
             pode_direita = 0;
         }
-        if(inimigo->coordenadas.x <= 30){
+        if(inimigo[i].coordenadas.x <= 30){
             pode_esquerda = 0;
         }
-        if(inimigo->coordenadas.y >= 950){
+        if(inimigo[i].coordenadas.y >= 950){
             pode_baixo = 0;
         }
-        if(inimigo->coordenadas.y <= 30){
+        if(inimigo[i].coordenadas.y <= 30){
             pode_cima = 0;
         }
         
-        if((x == 1 || x == 5) && pode_direita == 1 ){ //direita
-            inimigo->coordenadas.x += sqrt(2);
+        if((x == 1 ) && pode_direita == 1 ){ //direita
+            inimigo[i].coordenadas.x += 1;
         }
-        if((x == 2 || x == 6) && pode_esquerda == 1 ){
-            inimigo->coordenadas.x -= sqrt(2);
+        if((x == 2 ) && pode_esquerda == 1 ){
+            inimigo[i].coordenadas.x -= 1;
         }
-        if((x == 3 || x == 7) && pode_baixo == 1){
-            inimigo->coordenadas.y += sqrt(2);
+        if((x == 3 ) && pode_baixo == 1){
+            inimigo[i].coordenadas.y += 1;
         }
-        if((x == 4 || x == 8) && pode_cima == 1){
-            inimigo->coordenadas.y -= sqrt(2);
+        if((x == 4 ) && pode_cima == 1){
+            inimigo[i].coordenadas.y -= 1;
         }
-    //}
+    }
     
 } 
 
@@ -149,7 +147,7 @@ void perseguirJogador(Enemy *inimigos, Player jogador, int qtdInimigos) {//inimi
             }
         }
         else{
-            moveInimigoCirculos(&inimigos[i], qtdInimigos);
+            moveInimigoCirculos(inimigos, qtdInimigos);
         }
     }
 }
