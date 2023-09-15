@@ -153,3 +153,13 @@ void perseguirJogador(Enemy *inimigos, Player jogador, int qtdInimigos) {//inimi
         }
     }
 }
+
+void atualizaInimigo(Enemy *inimigo) {
+    inimigo->centro = (Vector2) {(2*inimigo->coordenadas.x + 8*inimigo->textura[0].width)/2, (2*inimigo->coordenadas.y + 8*inimigo->textura[0].height)/2};
+    inimigo->hitbox = (Rectangle) {
+        inimigo->coordenadas.x + 5,
+        inimigo->coordenadas.y,
+        108,
+        165,
+    };
+}
