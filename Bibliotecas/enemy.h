@@ -13,6 +13,6 @@ typedef struct {
 } Enemy;
 
 Enemy *inicializarInimigos(int numFase);
-//Enemy *atualizarVetorInimigos(Enemy *inimigos, int *qtdInimigos);
 void moveInimigoCirculos(Enemy *inimigo, int qtdInimigos);
 void perseguirJogador(Enemy *inimigos, Player jogador, int qtdInimigos);
+void atualizaInimigo(Enemy *inimigo);
