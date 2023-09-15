@@ -9,7 +9,7 @@
 #define BRANCO (Color) {255, 255, 255, 180}
 
 void printTelaEncerramento(Ranking *ranking);
-Fase criarFase(int numFase);
+void criarFase(int numFase, Fase *fase, Player jogador);
 void reiniciarFase(Player *jogador, Fase *fase);
 
 int main() {
@@ -23,7 +23,8 @@ int main() {
     SetTargetFPS(60);
     
     Player jogador = inicializarJogador();
-    Fase fase = criarFase(1);
+    Fase fase;
+    criarFase(1, &fase, jogador);
     fase.qtdInimigos = 1;
     //fase.mapa = LoadTexture("Sprites e Texturas/mapa.png");
     
@@ -148,7 +149,7 @@ int main() {
         
     /* MENU ------------------------------------------------------------------------------- */
         if(menu.continua == 0 && comando.continua == 0){ //Chama a primeira parte do menu       
-           menu = desenhaMenu(menu);                                                            
+           menu = desenhaMenu(menu, musica);                                                            
         }
         if(menu.continua == 1 && comando.continua == 0){ //Chama a parte dos comandos
            comando = iniciaJogo(comando);
@@ -178,10 +179,10 @@ int main() {
                 printScore(jogador.score);
                 
                 if (IsKeyPressed(KEY_SPACE)) {
+                    fase.faseAtual++;
                     reiniciarFase(&jogador, &fase);
                     PlayMusicStream(musicasFase[0]);
                     entrouNaPorta = 0;    
-                    fase.faseAtual++;
                     if (fase.faseAtual <= 3) fase.qtdInimigos = fase.faseAtual;
                 }
             } 
@@ -282,7 +283,7 @@ int main() {
             }
             
             //VIDA
-            if (CheckCollisionRecs(jogador.hitbox, fase.vida.hitbox)) pegarVida(&fase.chave, &jogador, &deathCount, cor); 
+            if (CheckCollisionRecs(jogador.hitbox, fase.vida.hitbox)) pegarVida(&fase.vida, &jogador, &deathCount, cor, fase.faseAtual); 
         /* -------------------------------------------------------------------------------------------------------------------------------------------- */
 
         /* GERA A HUD ---------------- */
@@ -321,39 +322,48 @@ int main() {
     
     free(fase.inimigos);
     free(fase.baterias);
+    free(ranking);
     CloseAudioDevice();
     CloseWindow();
     /* ----------------------------------------------------- */
-    return 0; 
+    return 0;  
 }
 
-Fase criarFase(int numFase) {
+void criarFase(int numFase, Fase *fase, Player jogador) {
     
-    Fase fase;
+    //Fase fase;
     
     //INICIALIZAR INIMIGOS
-    fase.inimigos = inicializarInimigos(numFase);
-    if (numFase <= 3) fase.qtdInimigos = numFase; 
-    else fase.qtdInimigos = 3;
+    if (numFase == 1) {
+        fase->inimigos = NULL;
+    }
+    fase->inimigos = inicializarInimigos(numFase, fase->inimigos);
+    if (numFase <= 3) fase->qtdInimigos = numFase; 
+    else fase->qtdInimigos = 3;
+   
+    for (int i = 0; i < fase->qtdInimigos; i++) {
+        float distInimigoJogador = sqrt(pow(fase->inimigos[i].centro.x - jogador.centro.x, 2) + pow(fase->inimigos[i].centro.y - jogador.centro.y, 2));
+        while (distInimigoJogador <= jogador.campoVisao) {//evita que o inimigo incialize em cima do jogador  
+            fase->inimigos = inicializarInimigos(numFase, fase->inimigos); 
+        }
+    }
  
     //INICIALIZACAO DAS BATERIAS
-    fase.qtdBaterias = 0;
-    fase.baterias = inicializarBaterias(&fase.qtdBaterias);
+    fase->qtdBaterias = 0;
+    fase->baterias = inicializarBaterias(&fase->qtdBaterias);
     
     //INICIALIZACAO DA CHAVE
-    fase.chave = inicializarChave();
+    fase->chave = inicializarChave();
     
     //INICIALIZACAO DA PORTA DE SAIDA
-    fase.porta = inicializarPorta();
+    fase->porta = inicializarPorta();
     
     int spawnVida = rand() % 2;//50% de chance de spawnar e 50% de nao spawnar
     if (spawnVida) {
-        fase.vida = inicializarVida();
+        fase->vida = inicializarVida();
     }
     
-    fase.faseAtual = numFase;
-    
-    return fase;
+    fase->faseAtual = numFase;
 }
 
 void reiniciarFase(Player *jogador, Fase *fase) {//usa o endereco do jogador para poder alterar a posicao e outros fatores
@@ -364,5 +374,5 @@ void reiniciarFase(Player *jogador, Fase *fase) {//usa o endereco do jogador par
     jogador->qtdBaterias = 0;
     jogador->temChave = 0;
     // Redefina a fase para o estado inicial
-    (*fase) = criarFase(fase->faseAtual);
+    criarFase(fase->faseAtual, fase, *jogador);
 }
