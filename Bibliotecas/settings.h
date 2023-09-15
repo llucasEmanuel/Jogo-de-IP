@@ -47,4 +47,4 @@ void removerJogador(Enemy *inimigo, Player *jogador, int *perdeu, int *deathCoun
 void pegarChave(Collectable *chave, Player *jogador, Color cor);
 void entrarNaPorta(Collectable *porta, Player *jogador, int *entrouNaPorta, int numFase, Color cor);
 void pegarBateria(Collectable *bateria, Player *jogador, Color cor);
-void pegarVida(Collectable *vida, Player *jogador, int *deathCount, Color cor)
+void pegarVida(Collectable *vida, Player *jogador, int *deathCount, Color cor, int numFase);
