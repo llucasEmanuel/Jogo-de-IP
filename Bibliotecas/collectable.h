@@ -1,6 +1,7 @@
 #include <raylib.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 typedef struct {
     Texture textura;
