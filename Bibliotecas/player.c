@@ -90,3 +90,15 @@ Player inicializarJogador() {
     //jogador.campoVisao = 150 + (50 * jogador.qtdBaterias);//raio = 1;
     return jogador;
 }
+
+void atualizaJogador(Player *jogador) {
+    jogador->campoVisao = 150 + (35 * jogador->qtdBaterias);//raio do campo de visao
+    jogador->centro = (Vector2) {(2*jogador->coordenadas.x + 0.33*jogador->textura.width)/2, (2*jogador->coordenadas.y + 0.33*jogador->textura.height)/2};
+    //hitbox dinamica que se move conforme o sprite do jogador
+    jogador->hitbox = (Rectangle) {
+        jogador->coordenadas.x + 18,
+        jogador->coordenadas.y + 40,
+        96,
+        90,
+    };
+}
