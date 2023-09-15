@@ -23,22 +23,25 @@ void iniciaComando(Comando *comando){ //funcao que inicializa a struct comando (
         (*comando).d = LoadTexture("./Sprites e Texturas/D.png"); 
         (*comando).continua = 0;
 }
-
+int delay = 300;
 Menu desenhaMenu(Menu menu, Music musica){ // funcao responsavel por desenhar a primeira parte do menu
     
     int liberaCreditos = 0;
     int apertouEspaco = 0; // auxiliares
     
     menu.mouse = GetMousePosition(); //essa funcao devolve as coordenadas do mouse (X, Y)
-
-    while (delay > 0) {
-        delay--;
-        BeginDrawing(); //comeca a desenhar
-        ClearBackground(LIGHTGRAY); //limpa o plano de fundo
-        DrawTextureEx(menu.FNAU, (Vector2) {-430, 115}, 0, 1.6, WHITE);
-        //WaitTime(05);//o tempo de "exibicao" da logo
-        EndDrawing();
-    }
+        
+     Texture FNAU = LoadTexture("./Sprites e Texturas/FNAU.png");
+    ;
+     while (delay > 0) {
+         delay--;
+         BeginDrawing();
+         ClearBackground(GRAY);
+         DrawTextureEx(FNAU, (Vector2) {-450, 110} , 0, 1.6, WHITE);
+         EndDrawing();
+     }
+        
+    UnloadTexture(FNAU);
     
     BeginDrawing(); //comeca a desenhar
        
@@ -54,228 +57,147 @@ Menu desenhaMenu(Menu menu, Music musica){ // funcao responsavel por desenhar a 
     
     //Configurando as letras do input do usuário
     if (IsKeyPressed(KEY_Q) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-        strcpy(menu.nome, "Q");
-        }
-        else{
+   
+       
            strcat(menu.nome, "Q"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_W) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-        strcpy(menu.nome, "W");
-        }
-        else{
+    
+       
            strcat(menu.nome, "W"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_E) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, "E");
-        }
-        else{
+      
            strcat(menu.nome, "E"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_R) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-        strcpy(menu.nome, "R");
-        }
-        else{
+      
            strcat(menu.nome, "R"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_T) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, "T");
-        }
-        else{
-           strcat(menu.nome, "T"); 
-        }
+        
+            strcat(menu.nome, "T"); 
+        
     }
     if (IsKeyPressed(KEY_Y) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, "Y");
-        }
-        else{
+      
            strcat(menu.nome, "Y"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_U) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, "U");
-        }
-        else{
+        
            strcat(menu.nome, "U"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_I) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, "I");
-        }
-        else{
+        
            strcat(menu.nome, "I"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_O) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, "O");
-        }
-        else{
+       
            strcat(menu.nome, "O"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_P) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, "P");
-        }
-        else{
+   
            strcat(menu.nome, "P"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_A) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, "A");
-        }
-        else{
+    
            strcat(menu.nome, "A"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_S) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, "S");
-        }
-        else{
+      
            strcat(menu.nome, "S"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_D) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, "D");
-        }
-        else{
+      
            strcat(menu.nome, "D"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_F) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, "F");
-        }
-        else{
+        
            strcat(menu.nome, "F"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_G) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, "G");
-        }
-        else{
+       
            strcat(menu.nome, "G"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_H) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, "H");
-        }
-        else{
+        
            strcat(menu.nome, "H"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_J) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, "J");
-        }
-        else{
+        
            strcat(menu.nome, "J"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_K) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, "K");
-        }
-        else{
+       
            strcat(menu.nome, "K"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_L) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-           strcpy(menu.nome, "L");
-        }
-        else{
+       
            strcat(menu.nome, "L"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_Z) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, "Z");
-        }
-        else{
+      
            strcat(menu.nome, "Z"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_X) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, "X");
-        }
-        else{
+      
            strcat(menu.nome, "X"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_C) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, "C");
-        }
-        else{
+       
            strcat(menu.nome, "C"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_V) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, "V");
-        }
-        else{
+        
+       
            strcat(menu.nome, "V"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_B) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, "B");
-        }
-        else{
+        
            strcat(menu.nome, "B"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_N) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, "N");
-        }
-        else{
+       
            strcat(menu.nome, "N"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_M) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, "M");
-        }
-        else{
+        
            strcat(menu.nome, "M"); 
-        }
+        
     }
     if (IsKeyPressed(KEY_SPACE) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, " ");
-        }
-        else{
+        
            strcat(menu.nome, " "); 
-        }
+        
     }
     if (IsKeyPressed(KEY_PERIOD) && strlen(menu.nome) < 12){
-        if(strlen(menu.nome) == 0){
-            strcpy(menu.nome, ".");
-        }
-        else{
+        
            strcat(menu.nome, "."); 
-        }
+        
     }
     if(strlen(menu.nome) != 0 && IsKeyPressed(KEY_BACKSPACE)){
         menu.nome[strlen(menu.nome) - 1] = '\0';
@@ -324,7 +246,7 @@ Menu desenhaMenu(Menu menu, Music musica){ // funcao responsavel por desenhar a 
             apertouEspaco = 1;
             
         }
-        if(IsKeyReleased(KEY_SPACE) && apertou == 1){
+        if(IsKeyReleased(KEY_SPACE) && apertouEspaco == 1){
                 liberaCreditos = 0;
         }
         
@@ -336,7 +258,6 @@ Menu desenhaMenu(Menu menu, Music musica){ // funcao responsavel por desenhar a 
        
     EndDrawing(); //fechando o desenho
     
-  
     return menu;
 }
 
