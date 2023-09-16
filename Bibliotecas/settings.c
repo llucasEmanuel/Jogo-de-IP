@@ -126,7 +126,7 @@ void desenharPorta(Player jogador, Collectable porta, float *distCampoVisaoPorta
     if (*distCampoVisaoPortaC < jogador.campoVisao) {
         DrawTextureEx(porta.textura, porta.coordenadas, 0, 2.2, WHITE);
     }
-    else DrawTextureEx(porta.textura, porta.coordenadas, 0, 2.2,  WHITE);
+    else DrawTextureEx(porta.textura, porta.coordenadas, 0, 2.2,  BLACK);
   
     DrawRectangle(porta.hitbox.x, porta.hitbox.y, porta.hitbox.width, porta.hitbox.height, BLANK);
 }
@@ -162,7 +162,7 @@ void desenharInimigo(Enemy *inimigo, Player jogador, float *acumulador, int *mus
                 (*musicaTocando) = 0;
             }
         }
-        DrawTextureEx(inimigo->textura[(*frameAtual)], inimigo->coordenadas, 0, 8, WHITE);
+        DrawTextureEx(inimigo->textura[(*frameAtual)], inimigo->coordenadas, 0, 8, BLACK);
     }
     DrawRectangle(inimigo->hitbox.x, inimigo->hitbox.y, inimigo->hitbox.width, inimigo->hitbox.height, BLANK);
 }
@@ -173,7 +173,7 @@ void desenharBateria(Collectable bateria, Player jogador) {
     if (distCampoVisaoBateriaC < jogador.campoVisao) {
         DrawTextureEx(bateria.textura, bateria.coordenadas, 0, 3, WHITE);
     }
-    else DrawTextureEx(bateria.textura, bateria.coordenadas, 0, 3, WHITE);
+    else DrawTextureEx(bateria.textura, bateria.coordenadas, 0, 3, BLACK);
 
     DrawRectangle(bateria.hitbox.x, bateria.hitbox.y, bateria.hitbox.width, bateria.hitbox.height, BLANK);
 }
@@ -184,7 +184,7 @@ void desenharChave(Collectable chave, Player jogador, float *distCampoVisaoChave
     if (*distCampoVisaoChaveC < jogador.campoVisao) {
         DrawTextureEx(chave.textura, chave.coordenadas, 0, 2.5, WHITE);
     }
-    else DrawTextureEx(chave.textura, chave.coordenadas, 0, 2.5, WHITE);
+    else DrawTextureEx(chave.textura, chave.coordenadas, 0, 2.5, BLACK);
 
     DrawRectangle(chave.hitbox.x, chave.hitbox.y, chave.hitbox.width, chave.hitbox.height, BLANK);
 }
@@ -195,7 +195,7 @@ void desenharVida(Collectable vida, Player jogador, float *distCampoVisaoVidaC) 
     if (*distCampoVisaoVidaC < jogador.campoVisao) {
         DrawTextureEx(vida.textura, vida.coordenadas, 0, 5, WHITE);
     }
-    else DrawTextureEx(vida.textura, vida.coordenadas, 0, 5, WHITE);
+    else DrawTextureEx(vida.textura, vida.coordenadas, 0, 5, BLACK);
  
     DrawRectangle(vida.hitbox.x, vida.hitbox.y, vida.hitbox.width, vida.hitbox.height, BLANK);
 }
