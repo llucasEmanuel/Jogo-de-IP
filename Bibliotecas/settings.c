@@ -19,10 +19,13 @@ void carregarMusicas(Music *musicasFase, Music *musicaMenu) {
     }
 }
 
-void carregarSons(Sound *youDied, Sound *musicaPerseguicao, Sound *musicaEncerramento) {
+void carregarSons(Sound *youDied, Sound *musicaPerseguicao, Sound *musicaEncerramento, Sound *miau, Sound *somScore, Sound *gameOverSound) {
     (*youDied) = LoadSound("Sons e Musica/you_died_DS.mp3");
     (*musicaEncerramento) = LoadSound("Sons e Musica/Dramatic Series Theme - Freedom Trail Studio.mp3");
     (*musicaPerseguicao) = LoadSound("Sons e Musica/Funeral in Sinaloa - Jimena Contreras.mp3");
+    (*miau) = LoadSound("Sons e Musica/gatoSFX.mp3");
+    (*somScore) = LoadSound("Sons e Musica/highscore.mp3");
+    (*gameOverSound) = LoadSound("Sons e Musica/gameOver.mp3");
 }
 
 void salvarScore(char *nome, int score) {
@@ -79,8 +82,8 @@ void printScore(int score) {
     int height = GetScreenHeight();
     int width = GetScreenWidth();
     BeginDrawing();
-    ClearBackground(WHITE);
-    DrawText(TextFormat("HIGHSCORE : %d", score), width / 2 - MeasureText("HIGHSCORE : ", 75) / 2, height / 2 - 75, 75, BLACK);
+    ClearBackground(GRAY);
+    DrawText(TextFormat("SCORE ATUAL: %d", score), width / 2 - MeasureText("SCORE ATUAL: ", 75) / 2, height / 2 - 75, 75, BLACK);
     EndDrawing();
 }
 
@@ -147,7 +150,7 @@ void desenharInimigo(Enemy *inimigo, Player jogador, float *acumulador, int *mus
             PlaySound(musicaPerseguicao);
             SetSoundVolume(musicaPerseguicao, 0.6);
             (*musicaTocando) = 1;
-            (*musicaDelay) = 240;//num de frames (5 segundos)
+            (*musicaDelay) = 120;
         }
         DrawTextureEx(inimigo->textura[(*frameAtual)], inimigo->coordenadas, 0, 8, WHITE);
     }
@@ -190,45 +193,45 @@ void desenharChave(Collectable chave, Player jogador, float *distCampoVisaoChave
 }
 
 void desenharVida(Collectable vida, Player jogador, float *distCampoVisaoVidaC) {
-    *distCampoVisaoVidaC = sqrt(pow((2*jogador.coordenadas.x + 0.33*jogador.textura.width)/2 - (2*vida.coordenadas.x + 5*vida.textura.width)/2, 2)
-    + pow((2*jogador.coordenadas.y + 0.33*jogador.textura.height)/2 - (2*vida.coordenadas.y + 5*vida.textura.height)/2, 2));
+    *distCampoVisaoVidaC = sqrt(pow((2*jogador.coordenadas.x + 0.33*jogador.textura.width)/2 - (2*vida.coordenadas.x + 2.2*vida.textura.width)/2, 2)
+    + pow((2*jogador.coordenadas.y + 0.33*jogador.textura.height)/2 - (2*vida.coordenadas.y + 2.2*vida.textura.height)/2, 2));
     if (*distCampoVisaoVidaC < jogador.campoVisao) {
-        DrawTextureEx(vida.textura, vida.coordenadas, 0, 5, WHITE);
+        DrawTextureEx(vida.textura, vida.coordenadas, 0, 2.2, WHITE);
     }
-    else DrawTextureEx(vida.textura, vida.coordenadas, 0, 5, BLACK);
+    else DrawTextureEx(vida.textura, vida.coordenadas, 0, 2.2, BLACK);
  
     DrawRectangle(vida.hitbox.x, vida.hitbox.y, vida.hitbox.width, vida.hitbox.height, BLANK);
 }
 
 void desenharJogador(Player jogador) {
-    DrawTextureEx(jogador.textura, jogador.coordenadas, 0, 0.33, WHITE);
+    DrawTextureRec(jogador.textura, (Rectangle){((jogador.frameLargura) * (jogador.frame)), 0, jogador.frameLargura, jogador.textura.height}, (Vector2) {jogador.coordenadas.x+jogador.frameLargura-10, jogador.coordenadas.y-10}, RAYWHITE);
     DrawRectangle(jogador.hitbox.x, jogador.hitbox.y, jogador.hitbox.width, jogador.hitbox.height, BLANK);
 }
 
 void gerarHUD(Camera2D camera, Fase fase, int *deathCount, CollectableContador *chave, CollectableContador *bateria, Player jogador) {
     //DESENHAR BARRA DE SANIDADE (A CADA MORTE ELA DIMINUI 1/3)
-    DrawText("SANIDADE", camera.target.x - MeasureText("SANIDADE", 35)/2, camera.target.y - 500, 35, SILVER);
+    DrawText("SANIDADE", camera.target.x - MeasureText("SANIDADE", 35)/2, camera.target.y - 500, 35, GRAY);
     DrawRectangle(camera.target.x - 125, camera.target.y - 450, 250, 40, SILVER);
     DrawRectangle(camera.target.x - 120, camera.target.y - 446, 240 - 80*(*deathCount), 32, RED);
     DrawRectangle(camera.target.x - 120 + 240 - (80*(*deathCount)), camera.target.y - 446, 80*(*deathCount), 32, BLACK);
 
     //DESENHAR OS ICONES, SCORE E QTD DE COLETAVEIS
-    DrawText(TextFormat("NOITE %d", fase.faseAtual), camera.target.x - MeasureText("NOITE 1", 40) / 2, camera.target.y + 400, 40, SILVER);
-    DrawText(TextFormat("SCORE : %d", jogador.score), camera.target.x - 900, camera.target.y - 500, 40, SILVER);
+    DrawText(TextFormat("NOITE %d", fase.faseAtual), camera.target.x - MeasureText("NOITE 1", 40) / 2, camera.target.y + 400, 40, GRAY);
+    DrawText(TextFormat("SCORE : %d", jogador.score), camera.target.x - 900, camera.target.y - 500, 40, GRAY);
     chave->coordenadas.x = camera.target.x - 900;
     chave->coordenadas.y = camera.target.y - 450;
     DrawTextureEx(chave->textura, chave->coordenadas, 0, 2.5, WHITE);
-    DrawText(TextFormat(" x %d", jogador.temChave), camera.target.x - 900 + (2.5 * chave->textura.width), camera.target.y - 450, 40, SILVER);
+    DrawText(TextFormat(" x %d", jogador.temChave), camera.target.x - 900 + (2.5 * chave->textura.width), camera.target.y - 450, 40, GRAY);
     bateria->coordenadas.x = camera.target.x - 900;
     bateria->coordenadas.y = camera.target.y - 400;
     DrawTextureEx(bateria->textura, bateria->coordenadas, 0, 3, WHITE);
-    DrawText(TextFormat(" x %d", jogador.qtdBaterias), camera.target.x - 900 + (3 * bateria->textura.width), camera.target.y - 390, 40, SILVER);
+    DrawText(TextFormat(" x %d", jogador.qtdBaterias), camera.target.x - 900 + (3 * bateria->textura.width), camera.target.y - 390, 40, GRAY);
 }
 
 void removerJogador(Enemy *inimigo, Player *jogador, int *perdeu, int *deathCount, Color cor) {
-    DrawTextureEx(jogador->textura, jogador->coordenadas, 0, 0.33, cor);
+    DrawTextureEx(jogador->textura, jogador->coordenadas, 0, 0.33, BLANK);
     printf("Colisao INIMIGO\n");
-    UnloadTexture(jogador->textura);
+    //UnloadTexture(jogador->textura);
     jogador->hitbox = (Rectangle) {0, 0, 0, 0};
     inimigo->colisao = 1;
     *perdeu = 1;
@@ -236,24 +239,25 @@ void removerJogador(Enemy *inimigo, Player *jogador, int *perdeu, int *deathCoun
 }
 
 void pegarChave(Collectable *chave, Player *jogador, Color cor) {
-    DrawTextureEx(chave->textura, chave->coordenadas, 0, 2.5, cor);
+    DrawTextureEx(chave->textura, chave->coordenadas, 0, 2.5, BLANK);
     chave->colisao = 1;
     printf("Colisao CHAVE\n");
-    UnloadTexture(chave->textura);//apaga a textura
+    //UnloadTexture(chave->textura);//apaga a textura
     chave->hitbox = (Rectangle) {0, 0, 0, 0};//remove a hitbox
     jogador->temChave = 1;//atualiza a flag do jogador
     jogador->score += 200;
 }
 
-void entrarNaPorta(Collectable *porta, Player *jogador, int *entrouNaPorta, int numFase, Color cor) {
+void entrarNaPorta(Collectable *porta, Player *jogador, int *entrouNaPorta, int numFase, Color cor, Sound somScore) {
     if (jogador->temChave) {
-        DrawTextureEx(porta->textura, porta->coordenadas, 0, 2.2, cor);
+        DrawTextureEx(porta->textura, porta->coordenadas, 0, 2.2, BLANK);
         porta->colisao = 1;
         printf("Colisao PORTA\n");
-        UnloadTexture(porta->textura);
+        //UnloadTexture(porta->textura);
         porta->hitbox = (Rectangle) {0, 0, 0, 0};
         jogador->score += 500;
         (*entrouNaPorta) = 1;
+        PlaySound(somScore);
     }
     else {
         if (numFase != 2)
@@ -265,31 +269,80 @@ void entrarNaPorta(Collectable *porta, Player *jogador, int *entrouNaPorta, int 
 
 void pegarBateria(Collectable *bateria, Player *jogador, Color cor) {
     if (bateria->colisao == 0) {
-        DrawTextureEx(bateria->textura, bateria->coordenadas, 0, 3, cor);
+        DrawTextureEx(bateria->textura, bateria->coordenadas, 0, 3, BLANK);
         bateria->colisao = 1;
         printf("Colisao BATERIA\n");
-        UnloadTexture(bateria->textura);
+        //UnloadTexture(bateria->textura);
         bateria->hitbox = (Rectangle){0, 0, 0, 0};
         jogador->qtdBaterias++; 
         jogador->score += 50;
     }
 }
 
-void pegarVida(Collectable *vida, Player *jogador, int *deathCount, Color cor, int numFase) {
+void pegarVida(Collectable *vida, Player *jogador, int *deathCount, Color cor, int numFase, Sound miau) {
     if ((*deathCount)) {
-        DrawTextureEx(vida->textura, vida->coordenadas, 0, 5, cor);
+        DrawTextureEx(vida->textura, vida->coordenadas, 0, 5, BLANK);
         vida->colisao = 1;
         jogador->pegouVida = 1;
         printf("Colisao VIDA\n");
-        UnloadTexture(vida->textura);
+        //UnloadTexture(vida->textura);
         vida->hitbox = (Rectangle) {0, 0, 0, 0};
         jogador->score += 100;
         if (*deathCount != 0) (*deathCount)--;//aumenta a barra de sanidade 
+        PlaySound(miau);
     }
     else {
         if (numFase != 2)
-            DrawText("SANIDADE COMPLETA", vida->coordenadas.x - 180, vida->coordenadas.y - 40, 40, RED);
+            DrawText("SANIDADE EM DIA", vida->coordenadas.x - 160, vida->coordenadas.y - 50, 40, RED);
         else
-            DrawText("SANIDADE COMPLETA", vida->coordenadas.x - 180, vida->coordenadas.y - 40, 40, SILVER);     
+            DrawText("SANIDADE EM DIA", vida->coordenadas.x - 160, vida->coordenadas.y - 50, 40, SILVER);     
     }
+}
+
+void criarFase(int numFase, Fase *fase, Player jogador) {
+    
+    //Fase fase;
+    
+    //INICIALIZAR INIMIGOS
+    if (numFase == 1) {
+        fase->inimigos = NULL;
+    }
+    fase->inimigos = inicializarInimigos(numFase, fase->inimigos);
+    if (numFase <= 3) fase->qtdInimigos = numFase; 
+    else fase->qtdInimigos = 3;
+   
+    for (int i = 0; i < fase->qtdInimigos; i++) {
+        float distInimigoJogador = sqrt(pow(fase->inimigos[i].centro.x - jogador.centro.x, 2) + pow(fase->inimigos[i].centro.y - jogador.centro.y, 2));
+        while (distInimigoJogador <= jogador.campoVisao) {//evita que o inimigo incialize em cima do jogador  
+            fase->inimigos = inicializarInimigos(numFase, fase->inimigos); 
+        }
+    }
+ 
+    //INICIALIZACAO DAS BATERIAS
+    fase->qtdBaterias = 0;
+    fase->baterias = inicializarBaterias(&fase->qtdBaterias);
+    
+    //INICIALIZACAO DA CHAVE
+    fase->chave = inicializarChave();
+    
+    //INICIALIZACAO DA PORTA DE SAIDA
+    fase->porta = inicializarPorta();
+    
+    int spawnVida = rand() % 2;//50% de chance de spawnar e 50% de nao spawnar
+    if (spawnVida) {
+        fase->vida = inicializarVida();
+    }
+    
+    fase->faseAtual = numFase;
+}
+
+void reiniciarFase(Player *jogador, Fase *fase) {//usa o endereco do jogador para poder alterar a posicao e outros fatores
+    int width = GetScreenWidth();
+    int height = GetScreenHeight();
+    jogador->textura = LoadTexture("Sprites e Texturas/spritebaixo.png");
+    jogador->coordenadas = (Vector2){width/2, height/2};
+    jogador->qtdBaterias = 0;
+    jogador->temChave = 0;
+    // Redefina a fase para o estado inicial
+    criarFase(fase->faseAtual, fase, *jogador);
 }
