@@ -42,7 +42,7 @@ Collectable inicializarChave() {
     int height = GetScreenHeight();
     int width = GetScreenWidth();
     Collectable chave;
-    chave.textura = LoadTexture("Sprites e Texturas/spriteChave2.png");
+    chave.textura = LoadTexture("Sprites e Texturas/spriteChave.png");
     chave.coordenadas = (Vector2) {(float) (rand() % (width - 90)), (float) (rand() % (height - 36))};
     chave.hitbox = (Rectangle) {
         chave.coordenadas.x,
@@ -76,11 +76,11 @@ Collectable inicializarVida() {
     int height = GetScreenHeight();
     int width = GetScreenWidth();
     Collectable vida;
-    vida.textura = LoadTexture("Sprites e Texturas/lifeHeart.png");
+    vida.textura = LoadTexture("Sprites e Texturas/gatoArea2.png");
     vida.coordenadas = (Vector2) {(float) (rand() % (width - (vida.textura.width * 2))), (float) (rand() % (height - (vida.textura.height * 2)))};
     vida.hitbox = (Rectangle) {
-        vida.coordenadas.x + 10,
-        vida.coordenadas.y,
+        vida.coordenadas.x + 8,
+        vida.coordenadas.y + 3,
         45,
         55,
     };
@@ -90,7 +90,7 @@ Collectable inicializarVida() {
 
 void InicializaColetavelContador(CollectableContador *mini){
     
-    (*mini).textura = LoadTexture("Sprites e Texturas/spriteChave2.png");
+    (*mini).textura = LoadTexture("Sprites e Texturas/spriteChave.png");
 }
 
 void InicializaColetavelContador1(CollectableContador *mini1){
