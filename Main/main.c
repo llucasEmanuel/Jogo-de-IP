@@ -8,10 +8,6 @@
 
 #define BRANCO (Color) {255, 255, 255, 180}
 
-void printTelaEncerramento(Ranking *ranking);
-void criarFase(int numFase, Fase *fase, Player jogador);
-void reiniciarFase(Player *jogador, Fase *fase);
-
 int main() {
     
 /* INICIALIZACAO DAS CONFIGURACOES BASICAS --------------------- */
@@ -26,20 +22,23 @@ int main() {
     Fase fase;
     criarFase(1, &fase, jogador);
     fase.qtdInimigos = 1;
-    //fase.mapa = LoadTexture("Sprites e Texturas/mapa.png");
+    fase.mapa = LoadTexture("Sprites e Texturas/mapa.png");
+    
     
     //INICIALIZACAO DOS SONS E MUSICAS
+    //AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA (ATIVAR O AUDIO DPS)
     InitAudioDevice();
     
     Music musicasFase[5], musica;
     carregarMusicas(musicasFase, &musica);
     
-    Sound youDied, musicaPerseguicao, musicaEncerramento;
-    carregarSons(&youDied, &musicaPerseguicao, &musicaEncerramento);
+    Sound youDied, musicaPerseguicao, musicaEncerramento, miau, somScore, gameOverSound;
+    carregarSons(&youDied, &musicaPerseguicao, &musicaEncerramento, &miau, &somScore, &gameOverSound);
+
     
     PlayMusicStream(musica);
     //flags de controle dos sons //colocar dentro da struct Fase
-    int musicaTocando = 0;//musica de perseguicao
+    int musicaTocando = 0;//musica de perseguicao 
     int musicaDelay = 0;
     //
     
@@ -72,10 +71,11 @@ int main() {
     int frameAtual = 0;
     float tempoFrame = 0.1;
     float acumulador = 0;
+  
 /* ------------------------------------------------------------- */
 
     while(!WindowShouldClose()) {//INICIO DO LOOP EM QUE RODA O JOGO
-        
+
         UpdateMusicStream(musica);
         
         int tamBarra = 240 - 80*deathCount;//calcula o tamanho da barra de sanidade
@@ -173,10 +173,11 @@ int main() {
                 
                 if (musicaTocando) {
                     StopSound(musicaPerseguicao);
-                    musicaTocando = 0;
+                    musicaTocando = 0;  
                 }
                 
                 printScore(jogador.score);
+                
                 
                 if (IsKeyPressed(KEY_SPACE)) {
                     fase.faseAtual++;
@@ -189,8 +190,17 @@ int main() {
         /* ----------------------------------------------------------------- */
             
         /* TELA DE GAME OVER --------------------------------------- */
-            if (tamBarra <= 0) gameOver = 1; 
+            int somGameOver = 0;
+            if (tamBarra <= 0) {
+                gameOver = 1; 
+                somGameOver = 1 ;
+            }
+            
             while (gameOver) { 
+                if (somGameOver) {
+                    PlaySound(gameOverSound);
+                    somGameOver = 0;
+                }
                 printGameOver();
                 if (IsKeyDown(KEY_ESCAPE)) {
                     gameOver = 0;
@@ -205,17 +215,18 @@ int main() {
                 atualizaInimigo(&fase.inimigos[i]);
             }
         /* ---------------------------------------------------------------------- */
-            
+        
+            //DEFINE A COR BASE DE CADA FASE
+            Color cor = definirCorFase(fase.faseAtual);
             BeginDrawing();
-            ClearBackground(BLACK);
+            ClearBackground(GRAY);
             
             BeginMode2D(camera);//ativa a camera
             
-            //DEFINE A COR BASE DE CADA FASE
-            Color cor = definirCorFase(fase.faseAtual);
             
+            DrawTexture(fase.mapa, 0, 0, GRAY);//DESENHAR COMO GRAY PRA FICAR MAIS DARK
             //DESENHA O CAMPO DE VISAO DO PERSONAGEM
-            DrawCircle(jogador.centro.x, jogador.centro.y, jogador.campoVisao, cor);
+            //DrawCircle(camera.target.x, camera.target.y, jogador.campoVisao, WHITE);
             
             //MARCADORES DOS LIMITES DA FASE
             DrawLine(0, 0, width, 0, BLACK);
@@ -259,8 +270,19 @@ int main() {
             
         /* --------------------------------------------------------------------------------------------------------------------------------- */
 
+            
+        /* DESENHA O CAMPO DE VISAO --------------------------------------------------------------------------------------- */   
+        Rectangle rec = {camera.target.x, camera.target.y, 810 - 35*jogador.qtdBaterias, 1600 - 35*jogador.qtdBaterias};
+        float angulo = 0;
+        int qtdRec = 30;
+        for (int i = 0; i < qtdRec; i++) {
+            DrawRectanglePro(rec, (Vector2){width / 2, height / 2}, angulo, BLACK);
+            angulo += 360/qtdRec;
+        }
+        /* ---------------------------------------------------------------------------------------------------------------- */
+        
         /* MOVIMENTACAO DO JOGADOR E DOS INIMIGOS --------------------- */
-            moverJogador(&jogador);
+            moverJogador(&jogador, fase.faseAtual);
             perseguirJogador(fase.inimigos, jogador, fase.qtdInimigos);
         /* ------------------------------------------------------------ */
             
@@ -275,7 +297,7 @@ int main() {
             if (CheckCollisionRecs(jogador.hitbox, fase.chave.hitbox)) pegarChave(&fase.chave, &jogador, cor);
             
             //PORTA
-            if (CheckCollisionRecs(jogador.hitbox, fase.porta.hitbox)) entrarNaPorta(&fase.porta, &jogador, &entrouNaPorta, fase.faseAtual, cor);
+            if (CheckCollisionRecs(jogador.hitbox, fase.porta.hitbox)) entrarNaPorta(&fase.porta, &jogador, &entrouNaPorta, fase.faseAtual, cor, somScore);
 
             //BATERIAS
             for (int i = 0; i < fase.qtdBaterias; i++) {
@@ -283,7 +305,8 @@ int main() {
             }
             
             //VIDA
-            if (CheckCollisionRecs(jogador.hitbox, fase.vida.hitbox)) pegarVida(&fase.vida, &jogador, &deathCount, cor, fase.faseAtual); 
+            if (CheckCollisionRecs(jogador.hitbox, fase.vida.hitbox)) pegarVida(&fase.vida, &jogador, &deathCount, cor, fase.faseAtual, miau);
+            
         /* -------------------------------------------------------------------------------------------------------------------------------------------- */
 
         /* GERA A HUD ---------------- */
@@ -303,6 +326,9 @@ int main() {
     UnloadSound(musicaEncerramento);
     UnloadSound(musicaPerseguicao);
     UnloadSound(youDied);
+    UnloadSound(miau);
+    UnloadSound(somScore);
+    UnloadSound(gameOverSound);
     
     UnloadTexture(jogador.textura);
     UnloadTexture(fase.chave.textura);
@@ -310,7 +336,7 @@ int main() {
     UnloadTexture(chave.textura);
     UnloadTexture(bateria.textura);
     UnloadTexture(fase.vida.textura);
-    //UnloadTexture(fase.mapa);
+    UnloadTexture(fase.mapa);
     for (int i = 0; i < fase.qtdInimigos; i++) {
         for (int j = 0; j < 4; j++)
             UnloadTexture(fase.inimigos[i].textura[j]); 
@@ -319,7 +345,6 @@ int main() {
        UnloadTexture(fase.baterias[i].textura); 
     }
     UnloadFont(fonteDS);
-    
     free(fase.inimigos);
     free(fase.baterias);
     free(ranking);
@@ -327,52 +352,4 @@ int main() {
     CloseWindow();
     /* ----------------------------------------------------- */
     return 0;  
-}
-
-void criarFase(int numFase, Fase *fase, Player jogador) {
-    
-    //Fase fase;
-    
-    //INICIALIZAR INIMIGOS
-    if (numFase == 1) {
-        fase->inimigos = NULL;
-    }
-    fase->inimigos = inicializarInimigos(numFase, fase->inimigos);
-    if (numFase <= 3) fase->qtdInimigos = numFase; 
-    else fase->qtdInimigos = 3;
-   
-    for (int i = 0; i < fase->qtdInimigos; i++) {
-        float distInimigoJogador = sqrt(pow(fase->inimigos[i].centro.x - jogador.centro.x, 2) + pow(fase->inimigos[i].centro.y - jogador.centro.y, 2));
-        while (distInimigoJogador <= jogador.campoVisao) {//evita que o inimigo incialize em cima do jogador  
-            fase->inimigos = inicializarInimigos(numFase, fase->inimigos); 
-        }
-    }
- 
-    //INICIALIZACAO DAS BATERIAS
-    fase->qtdBaterias = 0;
-    fase->baterias = inicializarBaterias(&fase->qtdBaterias);
-    
-    //INICIALIZACAO DA CHAVE
-    fase->chave = inicializarChave();
-    
-    //INICIALIZACAO DA PORTA DE SAIDA
-    fase->porta = inicializarPorta();
-    
-    int spawnVida = rand() % 2;//50% de chance de spawnar e 50% de nao spawnar
-    if (spawnVida) {
-        fase->vida = inicializarVida();
-    }
-    
-    fase->faseAtual = numFase;
-}
-
-void reiniciarFase(Player *jogador, Fase *fase) {//usa o endereco do jogador para poder alterar a posicao e outros fatores
-    int width = GetScreenWidth();
-    int height = GetScreenHeight();
-    jogador->textura = LoadTexture("Sprites e Texturas/sprite1.png");
-    jogador->coordenadas = (Vector2){width/2, height/2};
-    jogador->qtdBaterias = 0;
-    jogador->temChave = 0;
-    // Redefina a fase para o estado inicial
-    criarFase(fase->faseAtual, fase, *jogador);
 }
