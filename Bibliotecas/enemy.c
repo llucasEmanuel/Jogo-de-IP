@@ -83,26 +83,24 @@ void moveInimigoCirculos(Enemy *inimigo, int qtdInimigos) {//cria um padrao de m
     
 } 
 
+int delayTempo = 0;//CORRIGIR A FLAG DE DELAY
 void perseguirJogador(Enemy *inimigos, Player jogador, int qtdInimigos) {//inimigo tbm anda na diagonal
 
+
     for (int i = 0 ; i < qtdInimigos; i++) {
-  
         float deltaX = jogador.centro.x - inimigos[i].centro.x;//variacao em x
         float deltaY = jogador.centro.y - inimigos[i].centro.y;//variacao em y
         float distInimigoJogador = sqrt(pow(deltaX, 2) + pow(deltaY, 2));
-        
+        //DrawText("A", deltaX, deltaY, 30, RED);
         if (distInimigoJogador <= jogador.campoVisao) {//so ativa quando o inimigo ta dentro do campo de visao
             inimigos[i].detectouJogador = 1;
         }
-        else{
-            int marcelo = 300;
-            while(marcelo > 0){
-                marcelo--;
-            }
-            inimigos[i].detectouJogador = 0;
+        else {
+            inimigos[i].detectouJogador = 0;      
         }
        
         if (inimigos[i].detectouJogador) {
+
             int moveX = 1, moveY = 1;
             //margem para se movimentar (evita que o sprite fique tremendo quando fabs(deltaX ou deltaY) tende a 0)
             if (fabs(deltaX) <= 50) moveX = 0;
@@ -154,9 +152,7 @@ void perseguirJogador(Enemy *inimigos, Player jogador, int qtdInimigos) {//inimi
             }
         }
         else{
-            
             moveInimigoCirculos(inimigos, qtdInimigos);
-            
         }
     }
 }
