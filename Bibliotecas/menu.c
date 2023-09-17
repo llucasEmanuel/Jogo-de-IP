@@ -32,14 +32,14 @@ Menu desenhaMenu(Menu menu, Music musica){ // funcao responsavel por desenhar a 
     menu.mouse = GetMousePosition(); //essa funcao devolve as coordenadas do mouse (X, Y)
         
      Texture FNAU = LoadTexture("./Sprites e Texturas/FNAU.png");
-    
-     while (delay > 0) {
-         delay--;
-         BeginDrawing();
-         ClearBackground(GRAY);
-         DrawTextureEx(FNAU, (Vector2) {-450, 110} , 0, 1.6, WHITE);
-         EndDrawing();
-     } // apos passar um tempo, sai a tela de inicializacao
+     
+     // while (delay > 0) {
+          // delay--;
+          // BeginDrawing();
+          // ClearBackground(GRAY);
+          // DrawTextureEx(FNAU, (Vector2) {-450, 110} , 0, 1.6, WHITE);
+          // EndDrawing();
+      // }
         
     UnloadTexture(FNAU);
     
@@ -209,7 +209,7 @@ Ranking* organizaRanking(FILE *arq){ // funcao que le o arquivo do ranking e org
                 }
             }
         }
-    } // bubble sort
+    } //bubble sort
     
     ranking[0].qtdPessoas = qtd; // passando a quantidade de pessoas em um parametro "aleatorio" para auxiliar o controle
     
