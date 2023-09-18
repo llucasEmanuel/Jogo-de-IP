@@ -40,14 +40,15 @@ void desenharChave(Collectable chave, Player jogador, float *distCampoVisaoChave
 void desenharVida(Collectable vida, Player jogador, float *distCampoVisaoVidaC);
 void desenharJogador(Player jogador);
 
+//PRINTAR A HUD FIXA EM RELACAO A CAMERA
 void gerarHUD(Camera2D camera, Fase fase, int *deathCount, CollectableContador *chave, CollectableContador *bateria, Player jogador);
 
 //FUNCOES DE COLISOES
-void removerJogador(Enemy *inimigo, Player *jogador, int *perdeu, int *deathCount, Color cor);
-void pegarChave(Collectable *chave, Player *jogador, Color cor);
-void entrarNaPorta(Collectable *porta, Player *jogador, int *entrouNaPorta, int numFase, Color cor, Sound somScore);
-void pegarBateria(Collectable *bateria, Player *jogador, Color cor);
-void pegarVida(Collectable *vida, Player *jogador, int *deathCount, Color cor, int numFase, Sound miau);
+void removerJogador(Enemy *inimigo, Player *jogador, int *perdeu, int *deathCount);
+void pegarChave(Collectable *chave, Player *jogador);
+void entrarNaPorta(Collectable *porta, Player *jogador, int *entrouNaPorta, Sound somScore);
+void pegarBateria(Collectable *bateria, Player *jogador);
+void pegarVida(Collectable *vida, Player *jogador, int *deathCount, Sound miau);
 
 //FUNCOES DE CRIAR E RESETAR AS FASES
 void criarFase(int numFase, Fase *fase, Player jogador);
