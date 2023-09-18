@@ -15,9 +15,9 @@ typedef struct {
     Vector2 coordenadas;
 } CollectableContador;
 
-Collectable inicializarChave();
-Collectable *inicializarBaterias(int *qtdBaterias);
-Collectable inicializarPorta();
-Collectable inicializarVida();
+Collectable inicializarChave(int numFase);
+Collectable *inicializarBaterias(int *qtdBaterias, int numFase);
+Collectable inicializarPorta(int numFase);
+Collectable inicializarVida(int numFase);
 void InicializaColetavelContador(CollectableContador *mini);
 void InicializaColetavelContador1(CollectableContador *mini1);
