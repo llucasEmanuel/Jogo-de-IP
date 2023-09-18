@@ -1,5 +1,18 @@
 #include <raylib.h>
 #include "settings.h"
+/* HITBOXES DO MAPA
+Rectangle mesaG = {174, 885, 120, 196};
+    Rectangle mesaP = {1610, 885, 123, 192};
+    Rectangle bancada = {771, 382, 362, 108};
+    Rectangle guardaRoupa = {174, 166, 481, 216};
+    Rectangle estante = {1498, 166, 241, 188};
+    Rectangle bancasE1 = {409, 626, 242, 115}; 
+    Rectangle bancasE2 = {409, 866, 242, 115};
+    Rectangle bancasC1 = {772, 626, 360, 115};
+    Rectangle bancasC2 = {772, 866, 360, 115};
+    Rectangle bancasD1 = {1250, 626, 242, 115};
+    Rectangle bancasD2 = {1250, 866, 242, 115};
+*/
 
 Camera2D inicializarCamera(Player jogador) {
     int height = GetScreenHeight();
@@ -57,7 +70,6 @@ void printTelaPerdeu(int ind, Font fonteDS) {
     int width = GetScreenWidth();
     BeginDrawing();
     ClearBackground(BLACK);
- 
     if (ind != -1) {
         switch (ind) {
             case 0://MS
@@ -73,7 +85,6 @@ void printTelaPerdeu(int ind, Font fonteDS) {
                 break;
         }
     }
- 
     DrawText("Aperte [SPACE] para continuar", width/2 - MeasureText("Aperte [SPACE] para continuar", 50)/2, 980, 50, GRAY);
     EndDrawing();
 }
@@ -83,7 +94,7 @@ void printScore(int score) {
     int width = GetScreenWidth();
     BeginDrawing();
     ClearBackground(GRAY);
-    DrawText(TextFormat("SCORE ATUAL: %d", score), width / 2 - MeasureText("SCORE ATUAL: ", 75) / 2, height / 2 - 75, 75, BLACK);
+    DrawText(TextFormat("SCORE ATUAL: %d", score), width / 2 - MeasureText("SCORE ATUAL: 1111", 75) / 2, height / 2 - 75, 75, BLACK);
     EndDrawing();
 }
 
@@ -210,25 +221,25 @@ void desenharJogador(Player jogador) {
 
 void gerarHUD(Camera2D camera, Fase fase, int *deathCount, CollectableContador *chave, CollectableContador *bateria, Player jogador) {
     //DESENHAR BARRA DE SANIDADE (A CADA MORTE ELA DIMINUI 1/3)
-    DrawText("SANIDADE", camera.target.x - MeasureText("SANIDADE", 35)/2, camera.target.y - 500, 35, GRAY);
+    DrawText("SANIDADE", camera.target.x - MeasureText("SANIDADE", 35)/2, camera.target.y - 500, 35, SILVER);
     DrawRectangle(camera.target.x - 125, camera.target.y - 450, 250, 40, SILVER);
     DrawRectangle(camera.target.x - 120, camera.target.y - 446, 240 - 80*(*deathCount), 32, RED);
     DrawRectangle(camera.target.x - 120 + 240 - (80*(*deathCount)), camera.target.y - 446, 80*(*deathCount), 32, BLACK);
 
     //DESENHAR OS ICONES, SCORE E QTD DE COLETAVEIS
-    DrawText(TextFormat("NOITE %d", fase.faseAtual), camera.target.x - MeasureText("NOITE 1", 40) / 2, camera.target.y + 400, 40, GRAY);
-    DrawText(TextFormat("SCORE : %d", jogador.score), camera.target.x - 900, camera.target.y - 500, 40, GRAY);
+    DrawText(TextFormat("NOITE %d", fase.faseAtual), camera.target.x - MeasureText("NOITE 1", 40) / 2, camera.target.y + 400, 40, SILVER);
+    DrawText(TextFormat("SCORE : %d", jogador.score), camera.target.x - 900, camera.target.y - 500, 40, SILVER);
     chave->coordenadas.x = camera.target.x - 900;
     chave->coordenadas.y = camera.target.y - 450;
     DrawTextureEx(chave->textura, chave->coordenadas, 0, 2.5, WHITE);
-    DrawText(TextFormat(" x %d", jogador.temChave), camera.target.x - 900 + (2.5 * chave->textura.width), camera.target.y - 450, 40, GRAY);
+    DrawText(TextFormat(" x %d", jogador.temChave), camera.target.x - 900 + (2.5 * chave->textura.width), camera.target.y - 450, 40, SILVER);
     bateria->coordenadas.x = camera.target.x - 900;
     bateria->coordenadas.y = camera.target.y - 400;
     DrawTextureEx(bateria->textura, bateria->coordenadas, 0, 3, WHITE);
-    DrawText(TextFormat(" x %d", jogador.qtdBaterias), camera.target.x - 900 + (3 * bateria->textura.width), camera.target.y - 390, 40, GRAY);
+    DrawText(TextFormat(" x %d", jogador.qtdBaterias), camera.target.x - 900 + (3 * bateria->textura.width), camera.target.y - 390, 40, SILVER);
 }
 
-void removerJogador(Enemy *inimigo, Player *jogador, int *perdeu, int *deathCount, Color cor) {
+void removerJogador(Enemy *inimigo, Player *jogador, int *perdeu, int *deathCount) {
     DrawTextureEx(jogador->textura, jogador->coordenadas, 0, 0.33, BLANK);
     printf("Colisao INIMIGO\n");
     //UnloadTexture(jogador->textura);
@@ -238,7 +249,7 @@ void removerJogador(Enemy *inimigo, Player *jogador, int *perdeu, int *deathCoun
     (*deathCount)++;
 }
 
-void pegarChave(Collectable *chave, Player *jogador, Color cor) {
+void pegarChave(Collectable *chave, Player *jogador) {
     DrawTextureEx(chave->textura, chave->coordenadas, 0, 2.5, BLANK);
     chave->colisao = 1;
     printf("Colisao CHAVE\n");
@@ -248,7 +259,7 @@ void pegarChave(Collectable *chave, Player *jogador, Color cor) {
     jogador->score += 200;
 }
 
-void entrarNaPorta(Collectable *porta, Player *jogador, int *entrouNaPorta, int numFase, Color cor, Sound somScore) {
+void entrarNaPorta(Collectable *porta, Player *jogador, int *entrouNaPorta, Sound somScore) {
     if (jogador->temChave) {
         DrawTextureEx(porta->textura, porta->coordenadas, 0, 2.2, BLANK);
         porta->colisao = 1;
@@ -260,14 +271,11 @@ void entrarNaPorta(Collectable *porta, Player *jogador, int *entrouNaPorta, int 
         PlaySound(somScore);
     }
     else {
-        if (numFase != 2)
-            DrawText("PORTA TRANCADA", porta->coordenadas.x - 3*porta->textura.width, porta->coordenadas.y - 50, 40, RED);
-        else 
-            DrawText("PORTA TRANCADA", porta->coordenadas.x - 3*porta->textura.width, porta->coordenadas.y - 50, 40, SILVER);
+        DrawText("PORTA TRANCADA", porta->coordenadas.x - 3*porta->textura.width, porta->coordenadas.y - 50, 40, RED);
     }
 }
 
-void pegarBateria(Collectable *bateria, Player *jogador, Color cor) {
+void pegarBateria(Collectable *bateria, Player *jogador) {
     if (bateria->colisao == 0) {
         DrawTextureEx(bateria->textura, bateria->coordenadas, 0, 3, BLANK);
         bateria->colisao = 1;
@@ -279,7 +287,7 @@ void pegarBateria(Collectable *bateria, Player *jogador, Color cor) {
     }
 }
 
-void pegarVida(Collectable *vida, Player *jogador, int *deathCount, Color cor, int numFase, Sound miau) {
+void pegarVida(Collectable *vida, Player *jogador, int *deathCount, Sound miau) {
     if ((*deathCount)) {
         DrawTextureEx(vida->textura, vida->coordenadas, 0, 5, BLANK);
         vida->colisao = 1;
@@ -292,17 +300,11 @@ void pegarVida(Collectable *vida, Player *jogador, int *deathCount, Color cor, i
         PlaySound(miau);
     }
     else {
-        if (numFase != 2)
-            DrawText("SANIDADE EM DIA", vida->coordenadas.x - 160, vida->coordenadas.y - 50, 40, RED);
-        else
-            DrawText("SANIDADE EM DIA", vida->coordenadas.x - 160, vida->coordenadas.y - 50, 40, SILVER);     
+        DrawText("SANIDADE EM DIA", vida->coordenadas.x - 160, vida->coordenadas.y - 50, 40, RED);
     }
 }
 
 void criarFase(int numFase, Fase *fase, Player jogador) {
-    
-    //Fase fase;
-    
     //INICIALIZAR INIMIGOS
     if (numFase == 1) {
         fase->inimigos = NULL;
@@ -320,17 +322,20 @@ void criarFase(int numFase, Fase *fase, Player jogador) {
  
     //INICIALIZACAO DAS BATERIAS
     fase->qtdBaterias = 0;
-    fase->baterias = inicializarBaterias(&fase->qtdBaterias);
+    fase->baterias = inicializarBaterias(&fase->qtdBaterias, numFase);
     
     //INICIALIZACAO DA CHAVE
-    fase->chave = inicializarChave();
+    fase->chave = inicializarChave(numFase);
     
     //INICIALIZACAO DA PORTA DE SAIDA
-    fase->porta = inicializarPorta();
+    fase->porta = inicializarPorta(numFase);
     
-    int spawnVida = rand() % 2;//50% de chance de spawnar e 50% de nao spawnar
-    if (spawnVida) {
-        fase->vida = inicializarVida();
+    //INICIALIZACAO DA VIDA/GATO
+    fase->vida = inicializarVida(numFase);
+    int spawnGato = rand() % 2;//50% de chance de spawnar em um local inacessivel
+    if (spawnGato) {
+        fase->vida.coordenadas = (Vector2) {479, 282};
+        fase->vida.hitbox = (Rectangle) {0, 0, 0, 0};
     }
     
     fase->faseAtual = numFase;
@@ -340,7 +345,32 @@ void reiniciarFase(Player *jogador, Fase *fase) {//usa o endereco do jogador par
     int width = GetScreenWidth();
     int height = GetScreenHeight();
     jogador->textura = LoadTexture("Sprites e Texturas/spritebaixo.png");
-    jogador->coordenadas = (Vector2){width/2, height/2};
+    UnloadTexture(fase->vida.textura);
+    UnloadTexture(fase->chave.textura);
+    UnloadTexture(fase->porta.textura);
+    for (int i = 0; i < fase->qtdBaterias; i++) {
+        UnloadTexture(fase->baterias[i].textura);
+    }
+    switch (fase->faseAtual) {//posicao do jogador
+        case 1:
+            jogador->coordenadas = (Vector2) {width/2, height/2};
+            break;
+        case 2:
+            jogador->coordenadas = (Vector2) {150, 400};
+            break;
+        case 3:
+            jogador->coordenadas = (Vector2) {1300, 400};
+            break;
+        case 4:
+            jogador->coordenadas = (Vector2) {523, 807};
+            break;
+        case 5:
+            jogador->coordenadas = (Vector2) {89, 520};
+            break;
+        default:
+            break;
+    }
+    
     jogador->qtdBaterias = 0;
     jogador->temChave = 0;
     // Redefina a fase para o estado inicial
