@@ -20,3 +20,4 @@ typedef struct {
 void moverJogador(Player *jogador, int numFase);
 Player inicializarJogador();
 void atualizaJogador(Player *jogador);
+void colisaoJogadorMapa(Player *jogador);
