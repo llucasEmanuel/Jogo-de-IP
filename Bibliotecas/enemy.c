@@ -6,10 +6,7 @@
 #include "enemy.h"
 //#include "player.h"
 
-
 Enemy *inicializarInimigos(int numFase, Enemy *inimigos) {
-    int height = GetScreenHeight();
-    int width = GetScreenWidth();
     if (numFase == 1) inimigos = NULL;
     Enemy *ptrAux = (Enemy *) realloc(inimigos, sizeof(Enemy) * numFase);
     if (ptrAux == NULL) {
@@ -17,7 +14,7 @@ Enemy *inicializarInimigos(int numFase, Enemy *inimigos) {
         exit(1);
     }
     inimigos = ptrAux;
-    //CARREGAR OS SPRITES DO MARCIANO
+
     int limite = (numFase > 3) ? 3:numFase;
     for (int j = 0; j < limite; j++) {
         for (int i = 0; i < 4 && j == 0; i++) {//MARCIANO
@@ -38,7 +35,7 @@ Enemy *inicializarInimigos(int numFase, Enemy *inimigos) {
     }
     
     for (int i = 0; i < numFase; i++) {//inicializar os atributos de cada inimigo
-        inimigos[i].coordenadas = (Vector2) {(float) (rand() % (width - (inimigos[i].textura[0].width * 8))), (float) (rand() % (height - (inimigos[i].textura[0].height * 8)))};
+        inimigos[i].coordenadas = (Vector2) {(float) GetRandomValue(175, 1688), (float) GetRandomValue(281, 897)};
         inimigos[i].centro = (Vector2) {(2*inimigos[i].coordenadas.x + 8*inimigos[i].textura[0].width)/2, (2*inimigos[i].coordenadas.y + 8*inimigos[i].textura[0].height)/2};
         inimigos[i].detectouJogador = 0;
         inimigos[i].colisao = 0;
@@ -54,16 +51,16 @@ void moveInimigoCirculos(Enemy *inimigo, int qtdInimigos) {//cria um padrao de m
         int pode_direita = 1, pode_cima = 1, pode_baixo = 1, pode_esquerda = 1;
         x = (rand() % 4) + 1; //gera numero de 1 a 8 pra decidir onde o cara vai (dobrei o numero de opcoes pra ver se ele n fica rodando em um quadrado so)
         
-        if(inimigo[i].coordenadas.x >= 1700){
+        if(inimigo[i].coordenadas.x >= 1688){
             pode_direita = 0;
         }
-        if(inimigo[i].coordenadas.x <= 30){
+        if(inimigo[i].coordenadas.x <= 174){
             pode_esquerda = 0;
         }
-        if(inimigo[i].coordenadas.y >= 950){
+        if(inimigo[i].coordenadas.y >= 897){
             pode_baixo = 0;
         }
-        if(inimigo[i].coordenadas.y <= 30){
+        if(inimigo[i].coordenadas.y <= 281){
             pode_cima = 0;
         }
         
@@ -100,55 +97,50 @@ void perseguirJogador(Enemy *inimigos, Player jogador, int qtdInimigos) {//inimi
         }
        
         if (inimigos[i].detectouJogador) {
-
-            int moveX = 1, moveY = 1;
-            //margem para se movimentar (evita que o sprite fique tremendo quando fabs(deltaX ou deltaY) tende a 0)
-            if (fabs(deltaX) <= 50) moveX = 0;
-            if (fabs(deltaY) <= 50) moveY = 0;
         
-            if (deltaX > 0 && moveX) {
+            if (deltaX > 0) {
                 if (deltaY > 0) {
-                    inimigos[i].coordenadas.x += 1.5 * sqrt(2);
-                    inimigos[i].coordenadas.y += 1.5 * sqrt(2);
+                    inimigos[i].coordenadas.x += 1.25 * sqrt(2);
+                    inimigos[i].coordenadas.y += 1.25 * sqrt(2);
                 }
                 else if (deltaY < 0) {
-                    inimigos[i].coordenadas.x += 1.5 * sqrt(2);
-                    inimigos[i].coordenadas.y -= 1.5 * sqrt(2);
+                    inimigos[i].coordenadas.x += 1.25 * sqrt(2);
+                    inimigos[i].coordenadas.y -= 1.25 * sqrt(2);
                 }
-                else inimigos[i].coordenadas.x += 3;
+                else inimigos[i].coordenadas.x += 2.5;
             }
-            else if (deltaX < 0 && moveX) {
+            else if (deltaX < 0) {
                 if (deltaY > 0) {
-                    inimigos[i].coordenadas.x -= 1.5 * sqrt(2);
-                    inimigos[i].coordenadas.y += 1.5 * sqrt(2);
+                    inimigos[i].coordenadas.x -= 1.25 * sqrt(2);
+                    inimigos[i].coordenadas.y += 1.25 * sqrt(2);
                 }
                 else if (deltaY < 0) {
-                    inimigos[i].coordenadas.x -= 1.5 * sqrt(2);
-                    inimigos[i].coordenadas.y -= 1.5 * sqrt(2);
+                    inimigos[i].coordenadas.x -= 1.25 * sqrt(2);
+                    inimigos[i].coordenadas.y -= 1.25 * sqrt(2);
                 }
-                else inimigos[i].coordenadas.x -= 3;
+                else inimigos[i].coordenadas.x -= 2.5;
             }
-            else if (deltaY > 0 && moveY) {
+            else if (deltaY > 0) {
                 if (deltaX > 0) {
-                    inimigos[i].coordenadas.y += 1.5 * sqrt(2);
-                    inimigos[i].coordenadas.x += 1.5 * sqrt(2);
+                    inimigos[i].coordenadas.y += 1.25 * sqrt(2);
+                    inimigos[i].coordenadas.x += 1.25 * sqrt(2);
                 }
                 else if (deltaX < 0) {
-                    inimigos[i].coordenadas.y += 1.5 * sqrt(2);
-                    inimigos[i].coordenadas.x -= 1.5 * sqrt(2);
+                    inimigos[i].coordenadas.y += 1.25 * sqrt(2);
+                    inimigos[i].coordenadas.x -= 1.25 * sqrt(2);
                 }
-                else inimigos[i].coordenadas.y += 3;
+                else inimigos[i].coordenadas.y += 2.5;
             }
-            else if (deltaY < 0 && moveY) {
+            else if (deltaY < 0) {
                 if (deltaX > 0) {
-                    inimigos[i].coordenadas.y -= 1.5 * sqrt(2);
-                    inimigos[i].coordenadas.x += 1.5 * sqrt(2);
+                    inimigos[i].coordenadas.y -= 1.25 * sqrt(2);
+                    inimigos[i].coordenadas.x += 1.25 * sqrt(2);
                 }
                 else if (deltaX < 0) {
-                    inimigos[i].coordenadas.y -= 1.5 * sqrt(2);
-                    inimigos[i].coordenadas.x -= 1.5 * sqrt(2);
+                    inimigos[i].coordenadas.y -= 1.25 * sqrt(2);
+                    inimigos[i].coordenadas.x -= 1.25 * sqrt(2);
                 }
-                else inimigos[i].coordenadas.y -= 3;
+                else inimigos[i].coordenadas.y -= 2.5;
             }
         }
         else{
