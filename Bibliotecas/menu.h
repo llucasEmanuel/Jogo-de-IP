@@ -12,6 +12,7 @@ typedef struct{
     char nome[12];
     Vector2 mouse;
     Vector2 creditosPos;
+    int reinicia;
 } Menu;
 
 typedef struct{
