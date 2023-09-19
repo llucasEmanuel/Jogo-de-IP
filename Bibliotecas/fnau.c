@@ -4,12 +4,13 @@
 #include <math.h>
 #include <time.h>
 #include <raylib.h>
-#include "settings.h"
+#include "fnau.h"
 
 void FNAU() {
-    /* INICIALIZACAO DAS CONFIGURACOES BASICAS --------------------- */
+    
+/* INICIALIZACAO DAS CONFIGURACOES BASICAS --------------------- */
     srand(time(NULL));
-  
+    
     InitWindow(1920, 1080, "FNAU");
     int height = GetScreenHeight();
     int width = GetScreenWidth();
@@ -21,9 +22,8 @@ void FNAU() {
     fase.qtdInimigos = 1;
     fase.mapa = LoadTexture("Sprites e Texturas/mapa.png");
     
-    
-    //INICIALIZACAO DOS SONS E MUSICAS
     InitAudioDevice();
+    SetMasterVolume(0.5);
     
     Music musicasFase[5], musica;
     carregarMusicas(musicasFase, &musica);
@@ -31,6 +31,7 @@ void FNAU() {
     Sound youDied, musicaPerseguicao, musicaEncerramento, miau, somScore, gameOverSound;
     carregarSons(&youDied, &musicaPerseguicao, &musicaEncerramento, &miau, &somScore, &gameOverSound);
 
+    
     PlayMusicStream(musica);
     //flags de controle dos sons //colocar dentro da struct Fase
     int musicaTocando = 0;//musica de perseguicao 
@@ -103,7 +104,23 @@ void FNAU() {
                 gravouScore = 1;
                 perdeu = 0;
             }
-            printTelaEncerramento(ranking);
+            printTelaEncerramento(ranking, &menu);
+            if (menu.reinicia) {
+                gameOver = 0;
+                deathCount = 0;
+                entrouNaPorta = 0;
+                perdeu = 0;
+                musicaFaseTocando = 0;
+                StopSound(musicaEncerramento);
+                PlayMusicStream(musica);
+                free(fase.inimigos);
+                jogador = inicializarJogador();
+                criarFase(1, &fase, jogador);
+                    
+                iniciaMenu(&menu);
+                iniciaComando(&comando);
+            }
+            
         }
     /* --------------------------------------------------------------- */
 
@@ -173,6 +190,7 @@ void FNAU() {
                 
                 printScore(jogador.score);
                 
+                
                 if (IsKeyPressed(KEY_SPACE)) {
                     fase.faseAtual++;
                     reiniciarFase(&jogador, &fase);
@@ -192,13 +210,24 @@ void FNAU() {
             
             while (gameOver) { 
                 if (somGameOver) {
-                    PlaySound(gameOverSound); 
+                    PlaySound(gameOverSound);
                     somGameOver = 0;
                 }
-                printGameOver();
-                if (IsKeyDown(KEY_ESCAPE)) {
+                printGameOver(&menu);
+                if (menu.reinicia) {
                     gameOver = 0;
                     deathCount = 0;
+                    entrouNaPorta = 0;
+                    perdeu = 0;
+                    musicaFaseTocando = 0;
+                    StopSound(gameOverSound);
+                    PlayMusicStream(musica);
+                    free(fase.inimigos);
+                    jogador = inicializarJogador();
+                    criarFase(1, &fase, jogador);
+                    
+                    iniciaMenu(&menu);
+                    iniciaComando(&comando);
                 }
             }  
         /* ---------------------------------------------------------- */
@@ -210,14 +239,15 @@ void FNAU() {
             }
         /* ---------------------------------------------------------------------- */
         
-            //DEFINE A COR BASE DE CADA FASE
-            //Color cor = definirCorFase(fase.faseAtual);
             BeginDrawing();
             ClearBackground(GRAY);
             
             BeginMode2D(camera);//ativa a camera
             
+            
             DrawTexture(fase.mapa, 0, 0, GRAY);//DESENHAR COMO GRAY PRA FICAR MAIS DARK
+
+            //DrawCircle(camera.target.x, camera.target.y, jogador.campoVisao, WHITE);
             
         /* DESENHA AS TEXTURAS ------------------------------------------------------------------------------------------------------------- */
             
@@ -228,6 +258,7 @@ void FNAU() {
             //INIMIGOS
             if (!perdeu) {
                 for (int i = 0; i < fase.qtdInimigos; i++) {
+                    //DrawRectangleRec(fase.inimigos[i].hitbox, YELLOW);
                     desenharInimigo(&fase.inimigos[i], jogador, &acumulador, &musicaTocando, &musicaDelay, &frameAtual, &tempoFrame, musicasFase, musicaPerseguicao);
                 }
             }
@@ -243,12 +274,13 @@ void FNAU() {
             float distCampoVisaoChaveC;
             if (!jogador.temChave) desenharChave(fase.chave, jogador, &distCampoVisaoChaveC);
  
-            //VIDA //substituir coracao pelo gato da area2
+            //VIDA 
             float distCampoVisaoVidaC;
             if (fase.vida.colisao == 0) desenharVida(fase.vida, jogador, &distCampoVisaoVidaC);
 
             //JOGADOR
-            if (!perdeu) desenharJogador(jogador);
+            //if (!perdeu) 
+                desenharJogador(jogador);
             
             //PORTA (DEPOIS QUE TEM A CHAVE)
             if (jogador.temChave) desenharPorta(jogador, fase.porta, &distCampoVisaoPortaC);
@@ -256,16 +288,14 @@ void FNAU() {
         /* --------------------------------------------------------------------------------------------------------------------------------- */
 
             
-        /* DESENHA O CAMPO DE VISAO --------------------------------------------------------------------------------------- */  
-        
-        Rectangle rec = {camera.target.x, camera.target.y, 810 - 35*jogador.qtdBaterias, 1600 - 35*jogador.qtdBaterias};
-        float angulo = 0;
-        int qtdRec = 30;
-        for (int i = 0; i < qtdRec; i++) {
-            DrawRectanglePro(rec, (Vector2){width / 2, height / 2}, angulo, BLACK);
-            angulo += 360/qtdRec;
-        }
-        
+        /* DESENHA O CAMPO DE VISAO --------------------------------------------------------------------------------------- */   
+            Rectangle rec = {camera.target.x, camera.target.y, 810 - 35*jogador.qtdBaterias, 1600 - 35*jogador.qtdBaterias};
+            float angulo = 0;
+            int qtdRec = 30;
+            for (int i = 0; i < qtdRec; i++) {
+                //DrawRectanglePro(rec, (Vector2){width / 2, height / 2}, angulo, BLACK);
+                angulo += 360/qtdRec;
+            }
         /* ---------------------------------------------------------------------------------------------------------------- */
         
         /* MOVIMENTACAO DO JOGADOR E DOS INIMIGOS --------------------- */
@@ -325,17 +355,19 @@ void FNAU() {
     UnloadTexture(fase.vida.textura);
     UnloadTexture(fase.mapa);
     for (int i = 0; i < fase.qtdInimigos; i++) {
-        for (int j = 0; j < 4; j++)
-            UnloadTexture(fase.inimigos[i].textura[j]); 
+        UnloadTexture(fase.inimigos[i].textura); 
     }
     for (int i = 0; i < fase.qtdBaterias; i++) {
        UnloadTexture(fase.baterias[i].textura); 
     }
+    
     UnloadFont(fonteDS);
+    
     free(fase.inimigos);
     free(fase.baterias);
     free(ranking);
+    
     CloseAudioDevice();
     CloseWindow();
-    /* ----------------------------------------------------- */
+    /* ----------------------------------------------------- */ 
 }
