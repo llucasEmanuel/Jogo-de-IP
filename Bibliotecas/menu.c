@@ -32,17 +32,17 @@ Menu desenhaMenu(Menu menu, Music musica){ // funcao responsavel por desenhar a 
     
     menu.mouse = GetMousePosition(); //essa funcao devolve as coordenadas do mouse (X, Y)
         
-     //Texture FNAU = LoadTexture("./Sprites e Texturas/FNAU.png");
+    Texture FNAU = LoadTexture("./Sprites e Texturas/FNAU.png");
      
-     // while (delay > 0) {
-          // delay--;
-          // BeginDrawing();
-          // ClearBackground(GRAY);
-          // DrawTextureEx(FNAU, (Vector2) {-450, 110} , 0, 1.6, WHITE);
-          // EndDrawing();
-      // }
+    while (delay > 0) {
+        delay--;
+        BeginDrawing();
+        ClearBackground(GRAY);
+        DrawTextureEx(FNAU, (Vector2) {-450, 110} , 0, 1.6, WHITE);
+        EndDrawing();
+    }
         
-    //UnloadTexture(FNAU);
+    UnloadTexture(FNAU);
     
     BeginDrawing(); //comeca a desenhar
        
