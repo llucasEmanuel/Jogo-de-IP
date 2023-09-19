@@ -45,7 +45,7 @@ Enemy *inicializarInimigos(int numFase, Enemy *inimigos) {
     }
     
     for (int i = 0; i < numFase; i++) {//inicializar os atributos de cada inimigo
-        inimigos[i].coordenadas = (Vector2) {(float) GetRandomValue(175, 1688), (float) GetRandomValue(281, 897)}; 
+        inimigos[i].coordenadas = (Vector2) {(float) GetRandomValue(175, 1388), (float) GetRandomValue(281, 897)}; 
         inimigos[i].centro = (Vector2) {(2*inimigos[i].coordenadas.x + inimigos[i].textura.width)/2 - 512, (2*inimigos[i].coordenadas.y + inimigos[i].textura.height)/2 - 15};
         inimigos[i].detectouJogador = 0;
         inimigos[i].colisao = 0;
