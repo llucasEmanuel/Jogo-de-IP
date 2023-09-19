@@ -370,6 +370,6 @@ void atualizaInimigo(Enemy *inimigo) {
         inimigo->coordenadas.x + 42,
         inimigo->coordenadas.y + 20,
         50,
-        77,
+        60,
     };
 }   
