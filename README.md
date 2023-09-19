@@ -12,9 +12,9 @@ e decidem personificar-se na forma de professores do estudante, para atormentá-
 5 noites, enquanto ele tenta achar uma forma de fugir daquele lugar.
 
 Equipe 3:
--Marcelo Arcoverde Neves
--Lucas Emanuel Sabino
--Kalani Rafael Vieira
--Luanna Gomes Lucena
--Gabriel Valença Mayerhofer
--Paulo Vitor Barbosa Santana
+- Marcelo Arcoverde Neves
+- Lucas Emanuel Sabino
+- Kalani Rafael Vieira
+- Luanna Gomes Lucena
+- Gabriel Valença Mayerhofer
+- Paulo Vitor Barbosa Santana
