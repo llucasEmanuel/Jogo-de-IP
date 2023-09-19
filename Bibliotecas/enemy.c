@@ -67,16 +67,16 @@ void moveInimigoCirculos(Enemy *inimigo, int qtdInimigos) {//cria um padrao de m
         int pode_direita = 1, pode_cima = 1, pode_baixo = 1, pode_esquerda = 1;
         x = (rand() % 4) + 1; //gera numero de 1 a 8 pra decidir onde o cara vai (dobrei o numero de opcoes pra ver se ele n fica rodando em um quadrado so)
         
-        if(inimigo[i].coordenadas.x >= 50){
+        if(inimigo[i].coordenadas.x >= 1700){
             pode_direita = 0;
         }
-        if(inimigo[i].coordenadas.x <= 10){
+        if(inimigo[i].coordenadas.x <= 30){
             pode_esquerda = 0;
         }
-        if(inimigo[i].coordenadas.y >= 974){
+        if(inimigo[i].coordenadas.y >= 950){
             pode_baixo = 0;
         }
-        if(inimigo[i].coordenadas.y <= 230){
+        if(inimigo[i].coordenadas.y <= 30){
             pode_cima = 0;
         }
         
@@ -367,9 +367,9 @@ void perseguirJogador(Enemy *inimigos, Player jogador, int qtdInimigos) {//inimi
 void atualizaInimigo(Enemy *inimigo) {
     inimigo->centro = (Vector2) {(2*inimigo->coordenadas.x + inimigo->textura.width)/2 - 512, (2*inimigo->coordenadas.y + inimigo->textura.height)/2 - 15};
     inimigo->hitbox = (Rectangle) {
-        inimigo->coordenadas.x + 40,
-        inimigo->coordenadas.y + 17,
-        55,
-        88,
+        inimigo->coordenadas.x + 42,
+        inimigo->coordenadas.y + 20,
+        50,
+        77,
     };
 }   
