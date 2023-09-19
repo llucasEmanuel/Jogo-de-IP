@@ -287,9 +287,11 @@ void criarFase(int numFase, Fase *fase, Player jogador) {
     fase->inimigos = inicializarInimigos(numFase, fase->inimigos);
     if (numFase <= 3) fase->qtdInimigos = numFase; 
     else fase->qtdInimigos = 3;
-   
+    
     for (int i = 0; i < fase->qtdInimigos; i++) {
-        fase->inimigos = inicializarInimigos(numFase, fase->inimigos);   
+        fase->inimigos = inicializarInimigos(numFase, fase->inimigos);
+        while (fase->inimigos[i].detectouJogador)
+            fase->inimigos = inicializarInimigos(numFase, fase->inimigos);   
     }
  
     //INICIALIZACAO DAS BATERIAS
