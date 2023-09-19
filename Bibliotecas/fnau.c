@@ -338,4 +338,5 @@ void FNAU() {
     CloseAudioDevice();
     CloseWindow();
     /* ----------------------------------------------------- */
+    return 0;
 }
