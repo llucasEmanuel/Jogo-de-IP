@@ -15,6 +15,7 @@ typedef struct {
     int maxFrames;
     float frameLargura;
     float campoVisao;//circulo de luz gerado pela lanterna (varia em funcao do jogador.qtdBaterias)
+    int texturaCarregada;
 } Player;
 
 void moverJogador(Player *jogador, int numFase);
