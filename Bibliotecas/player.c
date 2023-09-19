@@ -14,6 +14,7 @@ void atualizaSprite(Player *jogador){
 
 void moverJogador(Player *jogador, int numFase) { //precisa do numero da fase pra definir as colisoes
     int pode_w = 1, pode_s = 1, pode_d = 1, pode_a = 1;
+    int texturaCarregada=0;  
     //COLISOES DO MAPA
     if(jogador->coordenadas.x <= 10){ //quando passa de um certo ponto, limita o movimento para esquerda
         pode_a = 0;
@@ -27,11 +28,16 @@ void moverJogador(Player *jogador, int numFase) { //precisa do numero da fase pr
     if(jogador->coordenadas.y >= 974){ //"" "" para baixo
         pode_s = 0;
     }
-        
+       
+    
     colisaoJogadorMapa(jogador);
-
+    
     if (IsKeyDown(KEY_W) && pode_w == 1) {
-        jogador->textura = LoadTexture("Sprites e Texturas/spritefrente.png");
+        if(jogador->texturaCarregada!=1){
+            //UnloadTexture(jogador->textura);
+            jogador->textura = LoadTexture("Sprites e Texturas/spritefrente.png");
+            jogador->texturaCarregada=1;
+        }
         if (IsKeyDown(KEY_D) && pode_d == 1) {
             jogador->coordenadas.y -= GetFrameTime() * (150 * sqrt(2));
             jogador->coordenadas.x += GetFrameTime() * (150 * sqrt(2));
@@ -48,7 +54,11 @@ void moverJogador(Player *jogador, int numFase) { //precisa do numero da fase pr
         }  
     }
     else if (IsKeyDown(KEY_S) && pode_s == 1) {
-        jogador->textura = LoadTexture("Sprites e Texturas/spritebaixo.png");
+        if(texturaCarregada!=2){
+            //UnloadTexture(jogador->textura);
+            jogador->textura = LoadTexture("Sprites e Texturas/spritebaixo.png");
+            jogador->texturaCarregada=2;
+        }
         if (IsKeyDown(KEY_D) && pode_d == 1) {
             jogador->coordenadas.y += GetFrameTime() * (150 * sqrt(2));
             jogador->coordenadas.x += GetFrameTime() * (150 * sqrt(2));
@@ -65,7 +75,11 @@ void moverJogador(Player *jogador, int numFase) { //precisa do numero da fase pr
         }  
     }
     else if (IsKeyDown(KEY_A) && pode_a == 1) {
-        jogador->textura = LoadTexture("Sprites e Texturas/spriteesquerda.png");
+        if(jogador->texturaCarregada!=3){
+            //UnloadTexture(jogador->textura);
+            jogador->textura = LoadTexture("Sprites e Texturas/spriteesquerda.png");
+            jogador->texturaCarregada=3;
+        }
         if (IsKeyDown(KEY_W) && pode_w == 1) {
             jogador->coordenadas.y -= GetFrameTime() * (150 * sqrt(2));
             jogador->coordenadas.x -= GetFrameTime() * (150 * sqrt(2));
@@ -82,7 +96,11 @@ void moverJogador(Player *jogador, int numFase) { //precisa do numero da fase pr
         } 
     }
     else if (IsKeyDown(KEY_D) && pode_d == 1) {
-        jogador->textura = LoadTexture("Sprites e Texturas/spritedireita.png");
+        if(jogador->texturaCarregada!=4){
+            //UnloadTexture(jogador->textura);
+            jogador->textura = LoadTexture("Sprites e Texturas/spritedireita.png");
+            jogador->texturaCarregada=4;
+        }
         if (IsKeyDown(KEY_W) && pode_w) {
             jogador->coordenadas.y -= GetFrameTime() * (150 * sqrt(2));
             jogador->coordenadas.x += GetFrameTime() * (150 * sqrt(2));
@@ -115,6 +133,8 @@ Player inicializarJogador() {
     jogador.frame=0;
     jogador.frameLargura=(float)(jogador.textura.width/9);
     jogador.maxFrames=(int)(jogador.textura.width/(int)jogador.frameLargura);
+    jogador.texturaCarregada=0;
+    //jogador.campoVisao = 150 + (50 * jogador.qtdBaterias);//raio = 1;
     return jogador;
 }
 
