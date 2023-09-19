@@ -26,11 +26,10 @@ void carregarSons(Sound *youDied, Sound *musicaPerseguicao, Sound *musicaEncerra
 void salvarScore(char *nome, int score);
 
 //GERAR TELAS
-void printTelaEncerramento(Ranking *ranking);
+void printTelaEncerramento(Ranking *ranking, Menu *menu);
 void printTelaPerdeu(int ind, Font fonteDS);
 void printScore(int score);
-void printGameOver();
-Color definirCorFase(int faseAtual);
+void printGameOver(Menu *menu);
 
 //DESENHAR TEXTURAS
 void desenharPorta(Player jogador, Collectable porta, float *distCampoVisaoPortaC);
