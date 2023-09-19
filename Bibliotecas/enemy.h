@@ -4,12 +4,17 @@
 #include "player.h"
 
 typedef struct {
-    Texture textura[4];//sprites do inimigo
+    Texture2D textura;
+    int texturaCarregada;
     Vector2 coordenadas;
     Rectangle hitbox;
     Vector2 centro;
     int detectouJogador;
     int colisao;
+    float timer;
+    int frame;
+    int maxFrames;
+    float frameLargura;
 } Enemy;
 
 Enemy *inicializarInimigos(int numFase, Enemy *inimigos);
