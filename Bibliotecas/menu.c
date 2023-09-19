@@ -6,7 +6,7 @@
 
 void iniciaMenu(Menu *menu){ //funcao que inicializa a struct menu (texturas e variaveis)
     (*menu).BG = LoadTexture("./Sprites e Texturas/bg_1.png"); 
-    (*menu).creditos = LoadTexture("./Sprites e Texturas/TheOneFromMars.png");
+    (*menu).creditos = LoadTexture("./Sprites e Texturas/saltyPaulCreditos.png");
     (*menu).continua = 0;
     (*menu).reinicia = 0;
     (*menu).w = GetScreenWidth();
