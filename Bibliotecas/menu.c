@@ -6,8 +6,9 @@
 
 void iniciaMenu(Menu *menu){ //funcao que inicializa a struct menu (texturas e variaveis)
     (*menu).BG = LoadTexture("./Sprites e Texturas/bg_1.png"); 
-    (*menu).creditos = LoadTexture("./Sprites e Texturas/theOneFromMars.png");
+    (*menu).creditos = LoadTexture("./Sprites e Texturas/TheOneFromMars.png");
     (*menu).continua = 0;
+    (*menu).reinicia = 0;
     (*menu).w = GetScreenWidth();
     (*menu).h = GetScreenHeight();
     (*menu).creditosPos.x = (*menu).w - 550;
@@ -23,7 +24,7 @@ void iniciaComando(Comando *comando){ //funcao que inicializa a struct comando (
         (*comando).d = LoadTexture("./Sprites e Texturas/D.png"); 
         (*comando).continua = 0;
 }
-int delay = 240;
+int delay = 300;
 Menu desenhaMenu(Menu menu, Music musica){ // funcao responsavel por desenhar a primeira parte do menu
     
     int liberaCreditos = 0;
@@ -31,17 +32,17 @@ Menu desenhaMenu(Menu menu, Music musica){ // funcao responsavel por desenhar a 
     
     menu.mouse = GetMousePosition(); //essa funcao devolve as coordenadas do mouse (X, Y)
         
-     Texture FNAU = LoadTexture("./Sprites e Texturas/FNAU.png");
+     //Texture FNAU = LoadTexture("./Sprites e Texturas/FNAU.png");
      
-    while (delay > 0) {
-        delay--;
-        BeginDrawing();
-        ClearBackground(GRAY);
-        DrawTextureEx(FNAU, (Vector2) {-450, 110} , 0, 1.6, WHITE);
-        EndDrawing();
-    }
+     // while (delay > 0) {
+          // delay--;
+          // BeginDrawing();
+          // ClearBackground(GRAY);
+          // DrawTextureEx(FNAU, (Vector2) {-450, 110} , 0, 1.6, WHITE);
+          // EndDrawing();
+      // }
         
-    UnloadTexture(FNAU);
+    //UnloadTexture(FNAU);
     
     BeginDrawing(); //comeca a desenhar
        
@@ -157,7 +158,7 @@ Comando iniciaJogo(Comando comando){ // funcao que desenha o menu de comandos
         DrawText("pela chave do GRAD 05 na", 1200, 250, 40, GRAY);
         DrawText("escuridão do CIN.", 1200, 300, 40, GRAY);
         DrawText("Baterias ajudam sua lanterna.", 1200, 375, 40, GRAY);
-        DrawText("Cuidado com os Paulo!", 1200, 450, 40, GRAY);
+        DrawText("NÃO SEJA REPROVADO!", 1200, 450, 40, GRAY);
         }
         else{ //inicia o jogo
             comando.continua = 1;
