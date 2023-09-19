@@ -243,8 +243,7 @@ void FNAU() {
             ClearBackground(GRAY);
             
             BeginMode2D(camera);//ativa a camera
-            
-            
+
             DrawTexture(fase.mapa, 0, 0, GRAY);//DESENHAR COMO GRAY PRA FICAR MAIS DARK
 
             //DrawCircle(camera.target.x, camera.target.y, jogador.campoVisao, WHITE);
@@ -293,7 +292,7 @@ void FNAU() {
             float angulo = 0;
             int qtdRec = 30;
             for (int i = 0; i < qtdRec; i++) {
-                //DrawRectanglePro(rec, (Vector2){width / 2, height / 2}, angulo, BLACK);
+                DrawRectanglePro(rec, (Vector2){width / 2, height / 2}, angulo, BLACK);
                 angulo += 360/qtdRec;
             }
         /* ---------------------------------------------------------------------------------------------------------------- */
