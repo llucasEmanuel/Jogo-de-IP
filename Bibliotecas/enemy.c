@@ -6,6 +6,17 @@
 #include "enemy.h"
 //#include "player.h"
 
+void atualizaSpriteInimigo(Enemy *inimigo, int qtdInimigos){
+    for(int i=0; i<qtdInimigos; i++){
+        inimigo[i].timer+=GetFrameTime();
+        if(inimigo[i].timer>=0.2f){
+            inimigo[i].timer=0.0f;
+            inimigo[i].frame+=1;
+        }
+        inimigo[i].frame=(inimigo[i].frame)%(inimigo[i].maxFrames);
+    }
+}
+
 Enemy *inicializarInimigos(int numFase, Enemy *inimigos) {
     if (numFase == 1) inimigos = NULL;
     Enemy *ptrAux = (Enemy *) realloc(inimigos, sizeof(Enemy) * numFase);
@@ -14,31 +25,35 @@ Enemy *inicializarInimigos(int numFase, Enemy *inimigos) {
         exit(1);
     }
     inimigos = ptrAux;
-
+    //CARREGAR OS SPRITES DO MARCIANO
     int limite = (numFase > 3) ? 3:numFase;
     for (int j = 0; j < limite; j++) {
-        for (int i = 0; i < 4 && j == 0; i++) {//MARCIANO
-            char file[20];
-            sprintf(file, "Sprites e Texturas/mars/marsS%d.png", i+1);
-            inimigos[j].textura[i] = LoadTexture(file);
+        if(j==0){
+            UnloadTexture(inimigos[j].textura);
+            inimigos[j].textura = LoadTexture("Sprites e Texturas/mars/marsBaixo.png");
         }
-        for (int i = 0; i < 4 && j == 1; i++) {//SALTYPAUL
-            char file[20];
-            sprintf(file, "Sprites e Texturas/saltyPaul/saltyPaulS%d.png", i+1);
-            inimigos[j].textura[i] = LoadTexture(file);
+        //SALTYPAUL
+        else if(j==1){
+            UnloadTexture(inimigos[j].textura);
+            inimigos[j].textura = LoadTexture("Sprites e Texturas/saltyPaul/pauloBaixo.png");
         }
-        for (int i = 0; i < 4 && j == 2; i++) {//NIVAN
-            char file[20];
-            sprintf(file, "Sprites e Texturas/nivan/nivanS%d.png", i+1);
-            inimigos[j].textura[i] = LoadTexture(file);
+        //NIVAN
+        else if(j==2){
+            UnloadTexture(inimigos[j].textura);
+            inimigos[j].textura = LoadTexture("Sprites e Texturas/nivan/nivanBaixo.png");
         }
     }
     
     for (int i = 0; i < numFase; i++) {//inicializar os atributos de cada inimigo
-        inimigos[i].coordenadas = (Vector2) {(float) GetRandomValue(175, 1688), (float) GetRandomValue(281, 897)};
-        inimigos[i].centro = (Vector2) {(2*inimigos[i].coordenadas.x + 8*inimigos[i].textura[0].width)/2, (2*inimigos[i].coordenadas.y + 8*inimigos[i].textura[0].height)/2};
+        inimigos[i].coordenadas = (Vector2) {(float) GetRandomValue(175, 1688), (float) GetRandomValue(281, 897)}; 
+        inimigos[i].centro = (Vector2) {(2*inimigos[i].coordenadas.x + inimigos[i].textura.width)/2 - 512, (2*inimigos[i].coordenadas.y + inimigos[i].textura.height)/2 - 15};
         inimigos[i].detectouJogador = 0;
         inimigos[i].colisao = 0;
+        inimigos[i].timer=0.0f;
+        inimigos[i].frame=0;
+        inimigos[i].frameLargura=(float)(inimigos[i].textura.width/9);
+        inimigos[i].maxFrames=(int)(inimigos[i].textura.width/(int)inimigos[i].frameLargura);
+        inimigos[i].texturaCarregada=0;  
     }
     return inimigos;
 }
@@ -47,40 +62,132 @@ void moveInimigoCirculos(Enemy *inimigo, int qtdInimigos) {//cria um padrao de m
     
     srand(time(NULL));
     int x;
+    
     for(int i = 0; i < qtdInimigos; i++){
         int pode_direita = 1, pode_cima = 1, pode_baixo = 1, pode_esquerda = 1;
         x = (rand() % 4) + 1; //gera numero de 1 a 8 pra decidir onde o cara vai (dobrei o numero de opcoes pra ver se ele n fica rodando em um quadrado so)
         
-        if(inimigo[i].coordenadas.x >= 1688){
+        if(inimigo[i].coordenadas.x >= 50){
             pode_direita = 0;
         }
-        if(inimigo[i].coordenadas.x <= 174){
+        if(inimigo[i].coordenadas.x <= 10){
             pode_esquerda = 0;
         }
-        if(inimigo[i].coordenadas.y >= 897){
+        if(inimigo[i].coordenadas.y >= 974){
             pode_baixo = 0;
         }
-        if(inimigo[i].coordenadas.y <= 281){
+        if(inimigo[i].coordenadas.y <= 230){
             pode_cima = 0;
         }
         
         if((x == 1 ) && pode_direita == 1 ){ //direita
+            if(i==0){
+                if(inimigo[i].texturaCarregada!=1){
+                    UnloadTexture(inimigo[i].textura);
+                    inimigo[i].textura = LoadTexture("Sprites e Texturas/mars/marsDireita.png");
+                    inimigo[i].texturaCarregada=1;
+                }
+            }
+            //SALTYPAUL
+            else if(i==1){
+                if(inimigo[i].texturaCarregada!=1){
+                    UnloadTexture(inimigo[i].textura);
+                    inimigo[i].textura = LoadTexture("Sprites e Texturas/saltyPaul/pauloDireita.png");
+                    inimigo[i].texturaCarregada=1;
+                }
+            }
+            //NIVAN
+            else if(i==2){
+                if(inimigo[i].texturaCarregada!=1){
+                    UnloadTexture(inimigo[i].textura);
+                    inimigo[i].textura = LoadTexture("Sprites e Texturas/nivan/nivanDireita.png");
+                    inimigo[i].texturaCarregada=1;
+                }
+            }
             inimigo[i].coordenadas.x += 1;
         }
-        if((x == 2 ) && pode_esquerda == 1 ){
+        else if((x == 2 ) && pode_esquerda == 1 ){
+            if(i==0){
+                if(inimigo[i].texturaCarregada!=2){
+                    UnloadTexture(inimigo[i].textura);
+                    inimigo[i].textura = LoadTexture("Sprites e Texturas/mars/marsEsquerda.png");
+                    inimigo[i].texturaCarregada=2;
+                }
+            }
+            //SALTYPAUL
+            else if(i==1){
+                if(inimigo[i].texturaCarregada!=2){
+                    UnloadTexture(inimigo[i].textura);
+                    inimigo[i].textura = LoadTexture("Sprites e Texturas/saltyPaul/pauloEsquerda.png");
+                    inimigo[i].texturaCarregada=2;
+                }
+            }
+            //NIVAN
+            else if(i==2){
+                if(inimigo[i].texturaCarregada!=2){
+                    UnloadTexture(inimigo[i].textura);
+                    inimigo[i].textura = LoadTexture("Sprites e Texturas/nivan/nivanEsquerda.png");
+                    inimigo[i].texturaCarregada=2;
+                }
+            }
             inimigo[i].coordenadas.x -= 1;
         }
-        if((x == 3 ) && pode_baixo == 1){
+        else if((x == 3 ) && pode_baixo == 1){
+            if(i==0){
+                if(inimigo[i].texturaCarregada!=3){
+                    UnloadTexture(inimigo[i].textura);
+                    inimigo[i].textura = LoadTexture("Sprites e Texturas/mars/marsBaixo.png");
+                    inimigo[i].texturaCarregada=3;
+                }
+            }
+            //SALTYPAUL
+            else if(i==1){
+                if(inimigo[i].texturaCarregada!=3){
+                    UnloadTexture(inimigo[i].textura);
+                    inimigo[i].textura = LoadTexture("Sprites e Texturas/saltyPaul/pauloBaixo.png");
+                    inimigo[i].texturaCarregada=3;
+                }
+            }
+            //NIVAN
+            else if(i==2){
+                if(inimigo[i].texturaCarregada!=3){
+                    UnloadTexture(inimigo[i].textura);
+                    inimigo[i].textura = LoadTexture("Sprites e Texturas/nivan/nivanBaixo.png");
+                    inimigo[i].texturaCarregada=3;
+                }
+            }
             inimigo[i].coordenadas.y += 1;
         }
-        if((x == 4 ) && pode_cima == 1){
+        else if((x == 4 ) && pode_cima == 1){
+            if(i==0){
+                if(inimigo[i].texturaCarregada!=4){
+                    UnloadTexture(inimigo[i].textura);
+                    inimigo[i].textura = LoadTexture("Sprites e Texturas/mars/marsFrente.png");
+                    inimigo[i].texturaCarregada=4;
+                }
+            }
+            //SALTYPAUL
+            else if(i==1){
+                if(inimigo[i].texturaCarregada!=4){
+                    UnloadTexture(inimigo[i].textura);
+                    inimigo[i].textura = LoadTexture("Sprites e Texturas/saltyPaul/pauloFrente.png");
+                    inimigo[i].texturaCarregada=4;
+                }
+            }
+            //NIVAN
+            else if(i==2){
+                if(inimigo[i].texturaCarregada!=4){
+                    UnloadTexture(inimigo[i].textura);
+                    inimigo[i].textura = LoadTexture("Sprites e Texturas/nivan/nivanFrente.png");
+                    inimigo[i].texturaCarregada=4;
+                }
+            }
             inimigo[i].coordenadas.y -= 1;
         }
     }
     
 } 
 
-int delayTempo = 0;//CORRIGIR A FLAG DE DELAY
 void perseguirJogador(Enemy *inimigos, Player jogador, int qtdInimigos) {//inimigo tbm anda na diagonal
 
 
@@ -96,65 +203,173 @@ void perseguirJogador(Enemy *inimigos, Player jogador, int qtdInimigos) {//inimi
             inimigos[i].detectouJogador = 0;      
         }
        
-        if (inimigos[i].detectouJogador) {
-        
-            if (deltaX > 0) {
-                if (deltaY > 0) {
-                    inimigos[i].coordenadas.x += 1.25 * sqrt(2);
-                    inimigos[i].coordenadas.y += 1.25 * sqrt(2);
-                }
-                else if (deltaY < 0) {
-                    inimigos[i].coordenadas.x += 1.25 * sqrt(2);
-                    inimigos[i].coordenadas.y -= 1.25 * sqrt(2);
-                }
-                else inimigos[i].coordenadas.x += 2.5;
-            }
-            else if (deltaX < 0) {
-                if (deltaY > 0) {
-                    inimigos[i].coordenadas.x -= 1.25 * sqrt(2);
-                    inimigos[i].coordenadas.y += 1.25 * sqrt(2);
-                }
-                else if (deltaY < 0) {
-                    inimigos[i].coordenadas.x -= 1.25 * sqrt(2);
-                    inimigos[i].coordenadas.y -= 1.25 * sqrt(2);
-                }
-                else inimigos[i].coordenadas.x -= 2.5;
-            }
-            else if (deltaY > 0) {
+            if (inimigos[i].detectouJogador) {
+            
                 if (deltaX > 0) {
-                    inimigos[i].coordenadas.y += 1.25 * sqrt(2);
-                    inimigos[i].coordenadas.x += 1.25 * sqrt(2);
+                    if (deltaY > 0) {
+                        inimigos[i].coordenadas.x += 1.25 * sqrt(2);
+                        inimigos[i].coordenadas.y += 1.25 * sqrt(2);
+                    }
+                    else if (deltaY < 0) {
+                        inimigos[i].coordenadas.x += 1.25 * sqrt(2);
+                        inimigos[i].coordenadas.y -= 1.25 * sqrt(2);
+                    }
+                    else inimigos[i].coordenadas.x += 2.5;
                 }
                 else if (deltaX < 0) {
-                    inimigos[i].coordenadas.y += 1.25 * sqrt(2);
-                    inimigos[i].coordenadas.x -= 1.25 * sqrt(2);
+                    if (deltaY > 0) {
+                        inimigos[i].coordenadas.x -= 1.25 * sqrt(2);
+                        inimigos[i].coordenadas.y += 1.25 * sqrt(2);
+                    }
+                    else if (deltaY < 0) {
+                        inimigos[i].coordenadas.x -= 1.25 * sqrt(2);
+                        inimigos[i].coordenadas.y -= 1.25 * sqrt(2);
+                    }
+                    else inimigos[i].coordenadas.x -= 2.5;
                 }
-                else inimigos[i].coordenadas.y += 2.5;
+                else if (deltaY > 0) {
+                    if (deltaX > 0) {
+                        inimigos[i].coordenadas.y += 1.25 * sqrt(2);
+                        inimigos[i].coordenadas.x += 1.25 * sqrt(2);
+                    }
+                    else if (deltaX < 0) {
+                        inimigos[i].coordenadas.y += 1.25 * sqrt(2);
+                        inimigos[i].coordenadas.x -= 1.25 * sqrt(2);
+                    }
+                    else inimigos[i].coordenadas.y += 2.5;
+                }
+                else if (deltaY < 0) {
+                    if (deltaX > 0) {
+                        inimigos[i].coordenadas.y -= 1.25 * sqrt(2);
+                        inimigos[i].coordenadas.x += 1.25 * sqrt(2);
+                    }
+                    else if (deltaX < 0) {
+                        inimigos[i].coordenadas.y -= 1.25 * sqrt(2);
+                        inimigos[i].coordenadas.x -= 1.25 * sqrt(2);
+                    }
+                    else inimigos[i].coordenadas.y -= 2.5;
+                }
+                //
+                
+                if(IsKeyDown(KEY_D) && deltaX > 0){ //direita
+                    if(i==0){
+                        if(inimigos[i].texturaCarregada!=1){
+                            UnloadTexture(inimigos[i].textura);
+                            inimigos[i].textura = LoadTexture("Sprites e Texturas/mars/marsDireita.png");
+                            inimigos[i].texturaCarregada=1;
+                        }
+                    }
+                    //SALTYPAUL
+                    else if(i==1){
+                        if(inimigos[i].texturaCarregada!=1){
+                            UnloadTexture(inimigos[i].textura);
+                            inimigos[i].textura = LoadTexture("Sprites e Texturas/saltyPaul/pauloDireita.png");
+                            inimigos[i].texturaCarregada=1;
+                        }
+                    }
+                    //NIVAN
+                    else if(i==2){
+                        if(inimigos[i].texturaCarregada!=1){
+                            UnloadTexture(inimigos[i].textura);
+                            inimigos[i].textura = LoadTexture("Sprites e Texturas/nivan/nivanDireita.png");
+                            inimigos[i].texturaCarregada=1;
+                        }
+                    }
+                inimigos[i].coordenadas.x += 1;
             }
-            else if (deltaY < 0) {
-                if (deltaX > 0) {
-                    inimigos[i].coordenadas.y -= 1.25 * sqrt(2);
-                    inimigos[i].coordenadas.x += 1.25 * sqrt(2);
+            else if(IsKeyDown(KEY_A) && deltaX < 0){
+                if(i==0){
+                    if(inimigos[i].texturaCarregada!=2){
+                        UnloadTexture(inimigos[i].textura);
+                        inimigos[i].textura = LoadTexture("Sprites e Texturas/mars/marsEsquerda.png");
+                        inimigos[i].texturaCarregada=2;
+                    }
                 }
-                else if (deltaX < 0) {
-                    inimigos[i].coordenadas.y -= 1.25 * sqrt(2);
-                    inimigos[i].coordenadas.x -= 1.25 * sqrt(2);
+                //SALTYPAUL
+                else if(i==1){
+                    if(inimigos[i].texturaCarregada!=2){
+                        UnloadTexture(inimigos[i].textura);
+                        inimigos[i].textura = LoadTexture("Sprites e Texturas/saltyPaul/pauloEsquerda.png");
+                        inimigos[i].texturaCarregada=2;
+                    }
                 }
-                else inimigos[i].coordenadas.y -= 2.5;
+                //NIVAN
+                else if(i==2){
+                    if(inimigos[i].texturaCarregada!=2){
+                        UnloadTexture(inimigos[i].textura);
+                        inimigos[i].textura = LoadTexture("Sprites e Texturas/nivan/nivanEsquerda.png");
+                        inimigos[i].texturaCarregada=2;
+                    }
+                }
+                inimigos[i].coordenadas.x -= 1;
             }
+            else if(IsKeyDown(KEY_S) && deltaY > 0){
+                if(i==0){
+                    if(inimigos[i].texturaCarregada!=3){
+                        UnloadTexture(inimigos[i].textura);
+                        inimigos[i].textura = LoadTexture("Sprites e Texturas/mars/marsBaixo.png");
+                        inimigos[i].texturaCarregada=3;
+                    }
+                }
+                //SALTYPAUL
+                else if(i==1){
+                    if(inimigos[i].texturaCarregada!=3){
+                        UnloadTexture(inimigos[i].textura);
+                        inimigos[i].textura = LoadTexture("Sprites e Texturas/saltyPaul/pauloBaixo.png");
+                        inimigos[i].texturaCarregada=3;
+                    }
+                }
+                //NIVAN
+                else if(i==2){
+                    if(inimigos[i].texturaCarregada!=3){
+                        UnloadTexture(inimigos[i].textura);
+                        inimigos[i].textura = LoadTexture("Sprites e Texturas/nivan/nivanBaixo.png");
+                        inimigos[i].texturaCarregada=3;
+                    }
+                }
+                inimigos[i].coordenadas.y += 1;
+            }
+            else if(IsKeyDown(KEY_W) && deltaY < 0){
+                if(i==0){
+                    if(inimigos[i].texturaCarregada!=4){
+                        UnloadTexture(inimigos[i].textura);
+                        inimigos[i].textura = LoadTexture("Sprites e Texturas/mars/marsFrente.png");
+                        inimigos[i].texturaCarregada=4;
+                    }
+                }
+                //SALTYPAUL
+                else if(i==1){
+                    if(inimigos[i].texturaCarregada!=4){
+                        UnloadTexture(inimigos[i].textura);
+                        inimigos[i].textura = LoadTexture("Sprites e Texturas/saltyPaul/pauloFrente.png");
+                        inimigos[i].texturaCarregada=4;
+                    }
+                }
+                //NIVAN
+                else if(i==2){
+                    if(inimigos[i].texturaCarregada!=4){
+                        UnloadTexture(inimigos[i].textura);
+                        inimigos[i].textura = LoadTexture("Sprites e Texturas/nivan/nivanFrente.png");
+                        inimigos[i].texturaCarregada=4;
+                    }
+                }
+                inimigos[i].coordenadas.y -= 1;
+            }
+            atualizaSpriteInimigo(inimigos, qtdInimigos);
         }
         else{
             moveInimigoCirculos(inimigos, qtdInimigos);
+            atualizaSpriteInimigo(inimigos, qtdInimigos);
         }
     }
 }
 
 void atualizaInimigo(Enemy *inimigo) {
-    inimigo->centro = (Vector2) {(2*inimigo->coordenadas.x + 8*inimigo->textura[0].width)/2, (2*inimigo->coordenadas.y + 8*inimigo->textura[0].height)/2};
+    inimigo->centro = (Vector2) {(2*inimigo->coordenadas.x + inimigo->textura.width)/2 - 512, (2*inimigo->coordenadas.y + inimigo->textura.height)/2 - 15};
     inimigo->hitbox = (Rectangle) {
-        inimigo->coordenadas.x + 5,
-        inimigo->coordenadas.y,
-        108,
-        165,
+        inimigo->coordenadas.x + 40,
+        inimigo->coordenadas.y + 17,
+        55,
+        88,
     };
-}
+}   
