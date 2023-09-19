@@ -13,7 +13,6 @@ Rectangle mesaG = {174, 885, 120, 196};
     Rectangle bancasD1 = {1250, 626, 242, 115};
     Rectangle bancasD2 = {1250, 866, 242, 115};
 */
-
 Camera2D inicializarCamera(Player jogador) {
     int height = GetScreenHeight();
     int width = GetScreenWidth();
@@ -51,7 +50,7 @@ void salvarScore(char *nome, int score) {
     fclose(file);
 }
 
-void printTelaEncerramento(Ranking *ranking) {
+void printTelaEncerramento(Ranking *ranking, Menu *menu) {
     int height = GetScreenHeight();
     int width = GetScreenWidth();
     BeginDrawing();
@@ -63,6 +62,9 @@ void printTelaEncerramento(Ranking *ranking) {
     }
     EndDrawing();
     DrawText("RANKING", width / 2 - 150, height / 2 - 125, 50, MAROON);
+    if (IsKeyPressed(KEY_SPACE)) {
+        (*menu).reinicia = 1;
+    }
 }
 
 void printTelaPerdeu(int ind, Font fonteDS) {
@@ -94,44 +96,22 @@ void printScore(int score) {
     int width = GetScreenWidth();
     BeginDrawing();
     ClearBackground(GRAY);
-    DrawText(TextFormat("SCORE ATUAL: %d", score), width / 2 - MeasureText("SCORE ATUAL: 1111", 75) / 2, height / 2 - 75, 75, BLACK);
+    DrawText(TextFormat("SCORE ATUAL: %d", score), width / 2 - MeasureText("SCORE ATUAL: ", 75) / 2, height / 2 - 75, 75, BLACK);
     EndDrawing();
 }
 
-void printGameOver() {
+void printGameOver(Menu *menu) {
     int height = GetScreenHeight();
     int width = GetScreenWidth();
     BeginDrawing();
     ClearBackground(BLACK);
     DrawText("VOCE FOI REPROVADO!", width/2 - MeasureText("VOCE FOI REPROVADO!", 120)/2, height/2 - 220, 120, MAROON);
     DrawText("GAME OVER", width/2 - MeasureText("GAME OVER", 150)/2, height/2 - 80, 150, RED);
+    DrawText("Aperte [SPACE] para continuar", width/2 - MeasureText("Aperte [SPACE] para continuar", 50)/2, 980, 50, GRAY);
     EndDrawing();
-}
-
-Color definirCorFase(int faseAtual) {
-    Color cores[5] = {WHITE, MAROON, SKYBLUE, ORANGE, GRAY};
-    Color cor;
-    switch (faseAtual) {
-        case 1:
-            cor = cores[0];
-            break;
-        case 2:
-            cor = cores[1];
-            break;
-        case 3:
-            cor = cores[2];
-            break;
-        case 4:
-            cor = cores[3];
-            break;
-        case 5:
-            cor = cores[4];
-            break;
-        default:
-            cor = BLACK;
-            break;
+    if (IsKeyPressed(KEY_SPACE)) {
+        (*menu).reinicia = 1;
     }
-    return cor;
 }
 
 void desenharPorta(Player jogador, Collectable porta, float *distCampoVisaoPortaC) {
@@ -146,14 +126,6 @@ void desenharPorta(Player jogador, Collectable porta, float *distCampoVisaoPorta
 }
 
 void desenharInimigo(Enemy *inimigo, Player jogador, float *acumulador, int *musicaTocando, int *musicaDelay, int *frameAtual, float *tempoFrame, Music *musicasFase, Sound musicaPerseguicao) {
-    float deltaT = GetFrameTime();
-    *acumulador += deltaT;
-  
-    if ((*acumulador) >= (*tempoFrame)) {
-        (*frameAtual) = (((*frameAtual) + 1) % 4);
-        (*acumulador) -= (*tempoFrame);
-    }
-
     float distCampoVisaoinimigoC = sqrt(pow(jogador.centro.x - inimigo->centro.x, 2) + pow(jogador.centro.y - inimigo->centro.y, 2));
     if (distCampoVisaoinimigoC < jogador.campoVisao) {//se tiver dentro do campo de visao
         if (!(*musicaTocando)) {
@@ -163,7 +135,8 @@ void desenharInimigo(Enemy *inimigo, Player jogador, float *acumulador, int *mus
             (*musicaTocando) = 1;
             (*musicaDelay) = 120;
         }
-        DrawTextureEx(inimigo->textura[(*frameAtual)], inimigo->coordenadas, 0, 8, WHITE);
+        DrawTextureRec(inimigo->textura, (Rectangle){((inimigo->frameLargura) * (inimigo->frame)), 0, inimigo->frameLargura, inimigo->textura.height}, (Vector2) {inimigo->coordenadas.x, inimigo->coordenadas.y}, RAYWHITE);
+
     }
     else { 
         if (*musicaTocando) {
@@ -176,9 +149,11 @@ void desenharInimigo(Enemy *inimigo, Player jogador, float *acumulador, int *mus
                 (*musicaTocando) = 0;
             }
         }
-        DrawTextureEx(inimigo->textura[(*frameAtual)], inimigo->coordenadas, 0, 8, BLACK);
+        DrawTextureRec(inimigo->textura, (Rectangle){((inimigo->frameLargura) * (inimigo->frame)), 0, inimigo->frameLargura, inimigo->textura.height}, (Vector2) {inimigo->coordenadas.x, inimigo->coordenadas.y}, BLACK);
+
     }
     DrawRectangle(inimigo->hitbox.x, inimigo->hitbox.y, inimigo->hitbox.width, inimigo->hitbox.height, BLANK);
+    //DrawTextureRec(inimigo->textura, (Rectangle){((inimigo->frameLargura) * (inimigo->frame)), 0, inimigo->frameLargura, inimigo->textura.height}, (Vector2) {inimigo->coordenadas.x, inimigo->coordenadas.y}, RAYWHITE);
 }
 
 void desenharBateria(Collectable bateria, Player jogador) {
@@ -314,10 +289,7 @@ void criarFase(int numFase, Fase *fase, Player jogador) {
     else fase->qtdInimigos = 3;
    
     for (int i = 0; i < fase->qtdInimigos; i++) {
-        float distInimigoJogador = sqrt(pow(fase->inimigos[i].centro.x - jogador.centro.x, 2) + pow(fase->inimigos[i].centro.y - jogador.centro.y, 2));
-        while (distInimigoJogador <= jogador.campoVisao) {//evita que o inimigo incialize em cima do jogador  
-            fase->inimigos = inicializarInimigos(numFase, fase->inimigos); 
-        }
+        fase->inimigos = inicializarInimigos(numFase, fase->inimigos);   
     }
  
     //INICIALIZACAO DAS BATERIAS
@@ -342,8 +314,8 @@ void criarFase(int numFase, Fase *fase, Player jogador) {
 }
 
 void reiniciarFase(Player *jogador, Fase *fase) {//usa o endereco do jogador para poder alterar a posicao e outros fatores
-    int width = GetScreenWidth();
     int height = GetScreenHeight();
+    int width = GetScreenWidth();
     jogador->textura = LoadTexture("Sprites e Texturas/spritebaixo.png");
     UnloadTexture(fase->vida.textura);
     UnloadTexture(fase->chave.textura);
