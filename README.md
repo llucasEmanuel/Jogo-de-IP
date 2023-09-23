@@ -1,6 +1,8 @@
 # Jogo de IP
 Projeto de jogo em C da disciplina de Introdução à Programação.
 
+![fnau_gif](https://github.com/llucasEmanuel/Jogo-de-IP/assets/131834616/f4d359f0-481a-4cdf-8f88-c5dce54aef30)
+
 História do Jogo (by Luanna):
 Um pobre aluno do CIn está prestes a ser reprovado em várias matérias,
 cansado de sempre tirar notas baixas, ele encontra um bilhete que 
