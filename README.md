@@ -1,4 +1,4 @@
-# Jogo de IP
+# FNAU, Jogo de IP
 Projeto de jogo em C da disciplina de Introdução à Programação.
 
 ![fnau_gif](https://github.com/llucasEmanuel/Jogo-de-IP/assets/131834616/f4d359f0-481a-4cdf-8f88-c5dce54aef30)
